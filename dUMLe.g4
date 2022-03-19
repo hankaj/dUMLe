@@ -9,13 +9,16 @@ diagcreation
     | use_case_diagram;
     
 class_diagram
-    : 'diagclass' BR NAME BR* ':' NL (IND instruction NL)+;
+    : 'diagclass' BR NAME BR* ':' BR* NL 
+    (IND instruction BR* NL)+;
 
 seq_diagram
-    : 'diagseq' BR NAME BR* ':' NL (IND instruction NL)+;
+    : 'diagseq' BR NAME BR* ':' BR* NL 
+    (IND instruction BR* NL)+;
 
 use_case_diagram
-    : 'diagusecase' BR NAME BR* ':' NL (IND instruction NL)+;
+    : 'diagusecase' BR NAME BR* ':' BR* NL 
+    (IND instruction BR* NL)+;
     
 instruction
     : obj_declaration
@@ -29,12 +32,12 @@ instruction
     | block_operation;
 
 obj_declaration
-    : class
+    : class_declaration
     | note
     | actor
     | theme
-    | package
-    | interface
+    | package_declaration
+    | interface_declaration
     | block;
 
 list_declaration
@@ -67,7 +70,7 @@ block_operation
 obj_access
     : NAME '.' (NAME | obj_access);
 
-class
+class_declaration
     : ('class' | 'abstract') (BR NAME)? BR NAME BR* ':' BR* NL
     (IND ('function')? (BR ('public' | 'protected' | 'private'))? BR TEXT BR* NL)+;
 
@@ -82,11 +85,11 @@ theme
     : 'theme' BR NAME BR* ':' BR* NL
     (IND param_type BR TEXT BR* NL)+;
     
-package
+package_declaration
     : 'package' (BR NAME)? BR NAME BR* ':' BR* NL
     (IND NAME BR* NL)+;
     
-interface
+interface_declaration
     : 'interface' (BR NAME)? BR NAME BR* ':' BR* NL
     (IND TEXT BR* NL)+;
 
@@ -115,7 +118,7 @@ COM_SIGN
 
 BR
     :
-    ' '+; 
+    '-'+; 
     
 NAME
     :
@@ -127,7 +130,8 @@ NL
     
 IND
     :
-    '\t';
+    '\t'
+    | '    ';
     
 QUOTE
     :
