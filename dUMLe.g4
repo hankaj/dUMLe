@@ -23,6 +23,7 @@ use_case_diagram
 instruction
     : obj_declaration
     | list_declaration
+    | list_access
     | named_list_declaration
     | fun_declaraion
     | fun_call
@@ -44,6 +45,9 @@ obj_declaration
 list_declaration
     : '[' BR* ((NAME | obj_access) BR* (',' BR* (NAME | obj_access))*)? BR* ']';
     
+list_access
+    : NAME '[' DIGIT+ ']' BR*;
+    
 named_list_declaration
     : NAME BR+ (fun_call | list_declaration) BR* NL;
 
@@ -56,17 +60,17 @@ fun_call
     : NAME '(' BR* arg_list BR* ')' BR*;
 
 execution
-    : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | NAME | obj_access))? (BR+ TEXT)? BR* NL;
+    : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | list_access | NAME | obj_access))? (BR+ TEXT)? BR* NL;
     
 loop
     : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access | fun_call) BR* ':' BR* NL
-        (IND+ instruction NL*)+;
+        (IND+ instruction NL)+;
         
 connection
-    : (NAME | obj_access) BR+ (ARROW | connection_type) BR+ (NAME | obj_access) (BR+ 'labeled' BR+ TEXT )? BR* NL;
+    : (NAME | obj_access | list_access) BR+ (ARROW | connection_type) BR+ (NAME | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
     
 block_operation
-    : ('activate' | 'destroy') BR+ (NAME | obj_access) BR* NL;
+    : ('activate' | 'destroy') BR+ (NAME | obj_access | list_access) BR* NL;
     
 obj_access
     : NAME '.' (NAME | obj_access);
@@ -88,7 +92,7 @@ theme
     
 package_declaration
     : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ (NAME | obj_access) BR* NL)+;
+    (IND+ (NAME | obj_access | list_access) BR* NL)+;
     
 interface_declaration
     : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
@@ -123,6 +127,10 @@ CR
 COM_SIGN 		
 	: 
 	'#' ~[\r\n]* -> skip;
+	
+DIGIT
+    :
+    [0-9];
 
 BR
     :
