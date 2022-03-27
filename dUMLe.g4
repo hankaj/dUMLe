@@ -10,15 +10,15 @@ diagcreation
     
 class_diagram
     : 'diagclass' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL)+;
+    (IND+ instruction BR* NL*)+;
 
 seq_diagram
     : 'diagseq' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL)+;
+    (IND+ instruction BR* NL*)+;
 
 use_case_diagram
     : 'diagusecase' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL)+;
+    (IND+ instruction BR* NL*)+;
     
 instruction
     : obj_declaration
@@ -45,22 +45,22 @@ list_declaration
     : '[' BR* ((NAME | obj_access) BR* (',' BR* (NAME | obj_access))*)? BR* ']';
     
 named_list_declaration
-    : NAME BR+ list_declaration BR* NL;
+    : NAME BR+ (fun_call | list_declaration) BR* NL;
 
 fun_declaraion
     : 'def' BR+ NAME '(' BR* arg_list BR* ')' BR* ':' BR* NL
-        (IND+ instruction NL)*
-        IND+ 'return' BR+ arg_list NL;
+        (IND+ instruction NL*)*
+        IND+ 'return' BR+ list_declaration BR* NL;
         
 fun_call
-    : NAME '(' BR* arg_list BR* ')' BR* NL;
+    : NAME '(' BR* arg_list BR* ')' BR*;
 
 execution
     : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | NAME | obj_access))? (BR+ TEXT)? BR* NL;
     
 loop
-    : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access) BR* ':' BR* NL
-        (IND+ instruction NL)+;
+    : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access | fun_call) BR* ':' BR* NL
+        (IND+ instruction NL*)+;
         
 connection
     : (NAME | obj_access) BR+ (ARROW | connection_type) BR+ (NAME | obj_access) (BR+ 'labeled' BR+ TEXT )? BR* NL;
@@ -73,7 +73,7 @@ obj_access
 
 class_declaration
     : ('class' | 'abstract') (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ ('function' BR+)? (('public' | 'protected' | 'private') BR+)? TEXT BR* NL)+;
+    (IND+ (('public' | 'protected' | 'private') BR+)? ('function' BR+)? TEXT BR* NL)+;
 
 note
     : 'note' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
@@ -88,11 +88,11 @@ theme
     
 package_declaration
     : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ NAME BR* NL)+;
+    (IND+ (NAME | obj_access) BR* NL)+;
     
 interface_declaration
     : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ TEXT BR* NL)+;
+    (IND+ ('function' BR+) TEXT BR* NL)+;
 
 arg_list
     : (NAME BR* (',' BR* NAME)*)?;
