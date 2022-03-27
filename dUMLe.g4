@@ -1,7 +1,7 @@
 grammar dUMLe;
 
 program
-    : (WS* (instruction | diagcreation) WS*)* EOF;
+    : ((BR | NL)* (instruction | diagcreation) (BR | NL)*)* EOF;
 
 diagcreation
     : class_diagram
@@ -9,16 +9,16 @@ diagcreation
     | use_case_diagram;
     
 class_diagram
-    : 'diagclass' BR NAME BR* ':' BR* NL 
-    (IND instruction BR* NL)+;
+    : 'diagclass' BR+ NAME BR* ':' BR* NL
+    (IND+ instruction BR* NL)+;
 
 seq_diagram
-    : 'diagseq' BR NAME BR* ':' BR* NL 
-    (IND instruction BR* NL)+;
+    : 'diagseq' BR+ NAME BR* ':' BR* NL
+    (IND+ instruction BR* NL)+;
 
 use_case_diagram
-    : 'diagusecase' BR NAME BR* ':' BR* NL 
-    (IND instruction BR* NL)+;
+    : 'diagusecase' BR+ NAME BR* ':' BR* NL
+    (IND+ instruction BR* NL)+;
     
 instruction
     : obj_declaration
@@ -38,75 +38,83 @@ obj_declaration
     | theme
     | package_declaration
     | interface_declaration
-    | block;
+    | block
+    | use_case;
 
 list_declaration
     : '[' BR* ((NAME | obj_access) BR* (',' BR* (NAME | obj_access))*)? BR* ']';
     
 named_list_declaration
-    : NAME BR list_declaration BR* NL;
+    : NAME BR+ list_declaration BR* NL;
 
 fun_declaraion
-    : 'def' BR NAME '(' BR* arg_list BR* ')' BR* ':' BR* NL
-        (IND instruction NL)+
-        IND 'return' BR arg_list NL;
+    : 'def' BR+ NAME '(' BR* arg_list BR* ')' BR* ':' BR* NL
+        (IND+ instruction NL)*
+        IND+ 'return' BR+ arg_list NL;
         
 fun_call
     : NAME '(' BR* arg_list BR* ')' BR* NL;
 
 execution
-    : 'exec' BR NAME (BR ('brief' | 'all'))? (BR (list_declaration | NAME | obj_access))? (BR (QUOTE FILENAME QUOTE))? BR* NL;
+    : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | NAME | obj_access))? (BR+ TEXT)? BR* NL;
     
 loop
-    : 'for' BR NAME BR 'in' BR (NAME | list_declaration | obj_access) BR* ':' BR* NL
-        (IND instruction NL)+;
+    : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access) BR* ':' BR* NL
+        (IND+ instruction NL)+;
         
 connection
-    : (NAME | obj_access) BR (ARROW | CONNECTIONTYPE) BR (NAME | obj_access) BR ('labeled' BR QUOTE TEXT QUOTE)? BR* NL;
+    : (NAME | obj_access) BR+ (ARROW | connection_type) BR+ (NAME | obj_access) (BR+ 'labeled' BR+ TEXT )? BR* NL;
     
 block_operation
-    : ('activate' | 'destroy') BR (NAME | obj_access) BR* NL;
+    : ('activate' | 'destroy') BR+ (NAME | obj_access) BR* NL;
     
 obj_access
     : NAME '.' (NAME | obj_access);
 
 class_declaration
-    : ('class' | 'abstract') (BR NAME)? BR NAME BR* ':' BR* NL
-    (IND ('function')? (BR ('public' | 'protected' | 'private'))? BR TEXT BR* NL)+;
+    : ('class' | 'abstract') (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (IND+ ('function' BR+)? (('public' | 'protected' | 'private') BR+)? TEXT BR* NL)+;
 
 note
-    : 'note' (BR NAME)? BR NAME BR* ':' BR* NL
-    (IND TEXT BR* NL)+;
+    : 'note' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (IND+ TEXT BR* NL)+;
 
 actor
-    : 'actor' (BR NAME)? BR NAME BR ('labeled' BR QUOTE TEXT QUOTE)? BR* NL;
+    : 'actor' (BR+ NAME)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
 
 theme
-    : 'theme' BR NAME BR* ':' BR* NL
-    (IND param_type BR TEXT BR* NL)+;
+    : 'theme' BR+ NAME BR* ':' BR* NL
+    (IND+ param_type BR+ TEXT BR* NL)+;
     
 package_declaration
-    : 'package' (BR NAME)? BR NAME BR* ':' BR* NL
-    (IND NAME BR* NL)+;
+    : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (IND+ NAME BR* NL)+;
     
 interface_declaration
-    : 'interface' (BR NAME)? BR NAME BR* ':' BR* NL
-    (IND TEXT BR* NL)+;
+    : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (IND+ TEXT BR* NL)+;
 
 arg_list
     : (NAME BR* (',' BR* NAME)*)?;
     
 block
-    : 'block' (BR NAME)? BR NAME BR ('labeled' BR QUOTE TEXT QUOTE)? BR* NL;
+    : 'block' (BR+ NAME)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
+
+use_case
+    : 'usecase' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (IND+ TEXT BR* NL)+;
 
 param_type
     : ('fontcolor' | 'backgroundcolor' | 'fontsize' | 'font'| 'bordercolor');
-    
-WS 				
-	:
-	'\n' 
-	| ' ' 
-	| '\t';
+
+connection_type
+    :
+    'inherit'
+     | 'implement'
+     | 'associate'
+     | 'depend'
+     | 'aggregate'
+     | 'compose';
 
 CR
 	: 
@@ -118,7 +126,7 @@ COM_SIGN
 
 BR
     :
-    '-'+; 
+    ' ';
     
 NAME
     :
@@ -138,25 +146,12 @@ QUOTE
     '\''|
     '"';
     
-FILENAME
-    :
-    TEXT'.'('png'|'jpg');
-    
 ARROW
     : 
     ('x<' | '<' | '<<' | '\\' | '//' | '\\\\' | 'o<' | '\\\\o')?
     ('.' | '-' | '_')
     ('>x' | '>' | '>>' | '\\' | '//' | '\\\\' | '>o' | 'o\\\\');
     
-CONNECTIONTYPE
-    :
-    'inherit'
-     | 'implement'
-     | 'associate'
-     | 'depend'
-     | 'aggregate'
-     | 'compose';
-    
 TEXT
     : 
-    (~[\r\n"])+;
+    QUOTE (~[\r\n"])+ QUOTE;
