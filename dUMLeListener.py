@@ -1,4 +1,4 @@
-# Generated from /Users/hania/Desktop/dUMLe.g4 by ANTLR 4.9.2
+# Generated from dUMLe.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .dUMLeParser import dUMLeParser
@@ -77,6 +77,15 @@ class dUMLeListener(ParseTreeListener):
 
     # Exit a parse tree produced by dUMLeParser#list_declaration.
     def exitList_declaration(self, ctx:dUMLeParser.List_declarationContext):
+        pass
+
+
+    # Enter a parse tree produced by dUMLeParser#list_access.
+    def enterList_access(self, ctx:dUMLeParser.List_accessContext):
+        pass
+
+    # Exit a parse tree produced by dUMLeParser#list_access.
+    def exitList_access(self, ctx:dUMLeParser.List_accessContext):
         pass
 
 
