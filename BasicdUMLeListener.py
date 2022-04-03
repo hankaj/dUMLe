@@ -4,10 +4,10 @@ from dUMLeParser import dUMLeParser
 
 class BasicdUMLeListner(dUMLeListener):
     def __init__(self):
-        # dict = {"App": {"dmfldfmsd"}}      App -> {  Game_Player_Inherit -> {"plantuml code"},  Player->{"plantuml"}  ... }
         self.is_in_class_diag = False
         self.is_in_class = False
         self.output = ""
+        self.themes = {}
 
     def update_output(self, string_to_add):
         self.output += string_to_add
@@ -19,7 +19,21 @@ class BasicdUMLeListner(dUMLeListener):
         self.update_output("@enduml")
         with open("output.txt", 'w+') as fp:
             fp.write(self.output.rstrip())
-        # todo: send the output to the server
+
+    # global
+
+    def enterTheme(self, ctx:dUMLeParser.ThemeContext):
+        if str(ctx.NAME()) in self.themes.keys():
+            raise Exception("This theme is already declared") # todo: add proper exception
+
+        theme_code = ""
+        # todo: implement theme here
+        self.themes[str(ctx.NAME())] = theme_code
+
+    def exitTheme(self, ctx:dUMLeParser.ThemeContext):
+        pass
+
+    # diagram functions
 
     def enterClass_diagram(self, ctx:dUMLeParser.Class_diagramContext):
         # todo: split the output here
@@ -29,30 +43,33 @@ class BasicdUMLeListner(dUMLeListener):
         # todo: end split the output here
         pass
 
+    # object delaration functions
+
     def enterClass_declaration(self, ctx:dUMLeParser.Class_declarationContext):
         # todo set in function flag
-        pass
+        # todo: deal with themes here
+        names = ctx.NAME()
+        self.update_output(ctx.CLASS_TYPE().getText() + " " + str(names[-1]) + "{\n")
 
     def exitClass_declaration(self, ctx:dUMLeParser.Class_declarationContext):
-        names = ctx.NAME()
-        # todo: deal with themes here
-        self.update_output("class " + str(names[-1]) + "{\n")
-        # todo: deal with access here
-        print(ctx.MODIFIER(1).getText())
-        for line in ctx.TEXT():
-            self.update_output(str(line)[1:-1] + "\n")
-
         self.update_output("}\n")
 
-    # Enter a parse tree produced by dUMLeParser#connection.
-    def enterConnection(self, ctx:dUMLeParser.ConnectionContext):
-        # todo: set flag?
+    def enterClass_declaration_line(self, ctx:dUMLeParser.Class_declaration_lineContext):
+        if ctx.MODIFIER():
+            type = {"private": "-", "public": "+", "protected": "#"}
+            self.update_output(type[str(ctx.MODIFIER())])
+        self.update_output(str(ctx.TEXT())[1:-1] + "\n")
+
+    def exitClass_declaration_line(self, ctx:dUMLeParser.Class_declaration_lineContext):
+        # todo: delete this ?
         pass
 
-    # Exit a parse tree produced by dUMLeParser#connection.
-    def exitConnection(self, ctx:dUMLeParser.ConnectionContext):
+    def enterConnection(self, ctx:dUMLeParser.ConnectionContext):
+        # todo: set flag? delete this ?
+        pass
+
+    def exitConnection(self, ctx:dUMLeParser.ConnectionContext): # connection is ready
         names = ctx.NAME()
-        # todo: implement label here
         if ctx.ARROW():
             arrow = str(ctx.ARROW())
         else:
@@ -63,7 +80,16 @@ class BasicdUMLeListner(dUMLeListener):
                     "depend": "<..",
                     "compose": "*--"}
             arrow = arrows[ctx.CONNECTION_TYPE().getText()]
-            #arrow = arrows[ctx.connection_type().getText()]
 
-        self.update_output(str(names[0]) + " " + arrow + " " + str(names[1]) + "\n")
+        self.update_output(str(names[0]) + " " + arrow + " " + str(names[1]))
 
+        if ctx.TEXT():
+            self.update_output(" : " + str(ctx.TEXT())[1:-1])
+
+        self.update_output("\n")
+
+    def exitNote(self, ctx:dUMLeParser.NoteContext):
+        self.update_output("note left\n")
+        for line in ctx.TEXT():
+            self.update_output("  " + line.getText()[1:-1] + "\n")
+        self.update_output("end note\n")

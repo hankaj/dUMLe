@@ -38,7 +38,6 @@ obj_declaration
     | actor
     | theme
     | package_declaration
-    | interface_declaration
     | block
     | use_case;
 
@@ -97,9 +96,9 @@ package_declaration
     : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
     (IND+ (NAME | obj_access | list_access) BR* NL)+;
     
-interface_declaration
-    : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ TEXT BR* NL)+;
+//interface_declaration
+//    : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+//    (IND+ TEXT BR* NL)+;
 
 arg_list
     : (NAME BR* (',' BR* NAME)*)?;
@@ -113,7 +112,8 @@ use_case
 
 CLASS_TYPE
     : 'class'
-    | 'abstract';
+    | 'abstract'
+    | 'interface';
 
 PARAM_TYPE
     : 'fontcolor'
