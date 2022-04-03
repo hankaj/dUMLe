@@ -12,8 +12,8 @@ def generate_output():
     server.processes_file(filename="output.txt", outfile=outfile)
 
 
-def execute_dumle(input_file):
-    input_stream = FileStream(input_file)
+def execute_dumle(input_stream):
+    #input_stream = FileStream(input_file)
     lexer = dUMLeLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = dUMLeParser(stream)

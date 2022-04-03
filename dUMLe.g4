@@ -67,17 +67,20 @@ loop
         (IND+ instruction NL)+;
         
 connection
-    : (NAME | obj_access | list_access) BR+ (ARROW | connection_type) BR+ (NAME | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
+    : (NAME | obj_access | list_access) BR+ (ARROW | CONNECTION_TYPE) BR+ (NAME | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
     
 block_operation
-    : ('activate' | 'destroy') BR+ (NAME | obj_access | list_access) BR* NL;
+    : BLOCK_OPERATION_TYPE BR+ (NAME | obj_access | list_access) BR* NL;
     
 obj_access
     : NAME '.' (NAME | obj_access);
 
 class_declaration
-    : ('class' | 'abstract') (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ (('public' | 'protected' | 'private') BR+)? ('function' BR+)? TEXT BR* NL)+;
+    : CLASS_TYPE (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    (class_declaration_line)+;
+
+class_declaration_line:
+    IND+ (MODIFIER BR+)? TEXT BR* NL;
 
 note
     : 'note' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
@@ -88,15 +91,15 @@ actor
 
 theme
     : 'theme' BR+ NAME BR* ':' BR* NL
-    (IND+ param_type BR+ TEXT BR* NL)+;
-    
+    (IND+ PARAM_TYPE BR+ TEXT BR* NL)+;
+
 package_declaration
     : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
     (IND+ (NAME | obj_access | list_access) BR* NL)+;
     
 interface_declaration
     : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ ('function' BR+) TEXT BR* NL)+;
+    (IND+ TEXT BR* NL)+;
 
 arg_list
     : (NAME BR* (',' BR* NAME)*)?;
@@ -108,10 +111,18 @@ use_case
     : 'usecase' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
     (IND+ TEXT BR* NL)+;
 
-param_type
-    : ('fontcolor' | 'backgroundcolor' | 'fontsize' | 'font'| 'bordercolor');
+CLASS_TYPE
+    : 'class'
+    | 'abstract';
 
-connection_type
+PARAM_TYPE
+    : 'fontcolor'
+    | 'backgroundcolor'
+    | 'fontsize'
+    | 'font'
+    | 'bordercolor';
+
+CONNECTION_TYPE
     :
     'inherit'
      | 'implement'
@@ -119,6 +130,15 @@ connection_type
      | 'depend'
      | 'aggregate'
      | 'compose';
+
+MODIFIER
+    : 'public'
+    | 'protected'
+    | 'private';
+
+BLOCK_OPERATION_TYPE
+    : 'activate'
+    | 'destroy';
 
 CR
 	: 

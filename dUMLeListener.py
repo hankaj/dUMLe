@@ -170,6 +170,15 @@ class dUMLeListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dUMLeParser#class_declaration_line.
+    def enterClass_declaration_line(self, ctx:dUMLeParser.Class_declaration_lineContext):
+        pass
+
+    # Exit a parse tree produced by dUMLeParser#class_declaration_line.
+    def exitClass_declaration_line(self, ctx:dUMLeParser.Class_declaration_lineContext):
+        pass
+
+
     # Enter a parse tree produced by dUMLeParser#note.
     def enterNote(self, ctx:dUMLeParser.NoteContext):
         pass
@@ -239,24 +248,6 @@ class dUMLeListener(ParseTreeListener):
 
     # Exit a parse tree produced by dUMLeParser#use_case.
     def exitUse_case(self, ctx:dUMLeParser.Use_caseContext):
-        pass
-
-
-    # Enter a parse tree produced by dUMLeParser#param_type.
-    def enterParam_type(self, ctx:dUMLeParser.Param_typeContext):
-        pass
-
-    # Exit a parse tree produced by dUMLeParser#param_type.
-    def exitParam_type(self, ctx:dUMLeParser.Param_typeContext):
-        pass
-
-
-    # Enter a parse tree produced by dUMLeParser#connection_type.
-    def enterConnection_type(self, ctx:dUMLeParser.Connection_typeContext):
-        pass
-
-    # Exit a parse tree produced by dUMLeParser#connection_type.
-    def exitConnection_type(self, ctx:dUMLeParser.Connection_typeContext):
         pass
 
 
