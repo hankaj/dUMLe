@@ -1,8 +1,8 @@
-from dUMLeListener import dUMLeListener
-from dUMLeParser import dUMLeParser
+from compiler.dUMLeListener import dUMLeListener
+from compiler.dUMLeParser import dUMLeParser
 
 
-class BasicdUMLeListner(dUMLeListener):
+class BasicdUMLeListener(dUMLeListener):
     def __init__(self):
         self.is_in_class_diag = False
         self.is_in_class = False
@@ -17,7 +17,7 @@ class BasicdUMLeListner(dUMLeListener):
 
     def exitProgram(self, ctx:dUMLeParser.ProgramContext):
         self.update_output("@enduml")
-        with open("output.txt", 'w+') as fp:
+        with open("results/output.txt", 'w+') as fp:
             fp.write(self.output.rstrip())
 
     # global

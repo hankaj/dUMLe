@@ -1,25 +1,24 @@
 import sys
 from antlr4 import *
-from dUMLeLexer import dUMLeLexer
-from dUMLeParser import dUMLeParser
-from BasicdUMLeListener import BasicdUMLeListner
+from compiler.dUMLeLexer import dUMLeLexer
+from compiler.dUMLeParser import dUMLeParser
+from compiler.BasicdUMLeListener import BasicdUMLeListener
 from plantuml import PlantUML
 
 
 def generate_output():
-    outfile = "result.png"
+    outfile = "results/result.png"
     server = PlantUML(url='http://www.plantuml.com/plantuml/img/')
-    server.processes_file(filename="output.txt", outfile=outfile)
+    server.processes_file(filename="results/output.txt", outfile=outfile)
 
 
 def execute_dumle(input_stream):
-    #input_stream = FileStream(input_file)
     lexer = dUMLeLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = dUMLeParser(stream)
     tree = parser.program()
     walker = ParseTreeWalker()
-    listener = BasicdUMLeListner()
+    listener = BasicdUMLeListener()
     walker.walk(listener, tree)
     generate_output()
 
