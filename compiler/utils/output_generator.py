@@ -19,3 +19,5 @@ class OutputGenerator:
     def generate(self, diag_name: str, mode: Mode, object_list: List, output_filename: str) -> None:
         # todo: write generator
         pass
+
+    # todo: create add method

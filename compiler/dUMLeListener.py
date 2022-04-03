@@ -1,7 +1,7 @@
 # Generated from dUMLe.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
-    from compiler.dUMLeParser import dUMLeParser
+    from .dUMLeParser import dUMLeParser
 else:
     from dUMLeParser import dUMLeParser
 
@@ -212,15 +212,6 @@ class dUMLeListener(ParseTreeListener):
 
     # Exit a parse tree produced by dUMLeParser#package_declaration.
     def exitPackage_declaration(self, ctx:dUMLeParser.Package_declarationContext):
-        pass
-
-
-    # Enter a parse tree produced by dUMLeParser#interface_declaration.
-    def enterInterface_declaration(self, ctx:dUMLeParser.Interface_declarationContext):
-        pass
-
-    # Exit a parse tree produced by dUMLeParser#interface_declaration.
-    def exitInterface_declaration(self, ctx:dUMLeParser.Interface_declarationContext):
         pass
 
 
