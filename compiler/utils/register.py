@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
+
 @dataclass
 class Scope:
     name: str
@@ -18,14 +19,14 @@ class Register:
         if scope_name is None:
             return False
         if object_name not in self.scopes[scope_name].object_register:
-            return self.is_object_in_scope(object_name, self.scopes[scope_name].parent_name)
+            return self.is_object_in_scope(object_name, self.parent_name(scope_name))
         return True
 
     def is_function_in_scope(self, function_name: str, scope_name: str) -> bool:
         if scope_name is None:
             return False
         if function_name not in self.scopes[scope_name].function_register.keys():
-            return self.is_function_in_scope(function_name, self.scopes[scope_name].parent_name)
+            return self.is_function_in_scope(function_name, self.parent_name(scope_name))
         return True
 
     def add_object_to_scope(self, object_name: str, scope_name: str) -> None:
@@ -37,4 +38,7 @@ class Register:
         if self.is_function_in_scope(function_name, scope_name):
             raise Exception("This function is already declared")
         self.scopes[scope_name].function_register[function_name] = function_body
+
+    def parent_name(self, scope_name: str) -> str:
+        return self.scopes[scope_name].parent
         

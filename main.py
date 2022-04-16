@@ -1,8 +1,10 @@
 import sys
-from antlr4 import *
+from antlr4 import CommonTokenStream, ParseTreeWalker, FileStream
 from compiler.dUMLeLexer import dUMLeLexer
 from compiler.dUMLeParser import dUMLeParser
 from compiler.BasicdUMLeListener import BasicdUMLeListener
+from compiler.IndexingdUMLeListener import IndexingdUMLeListener
+from compiler.utils.register import Register
 from plantuml import PlantUML
 
 
@@ -18,9 +20,13 @@ def execute_dumle(input_stream):
     parser = dUMLeParser(stream)
     tree = parser.program()
     walker = ParseTreeWalker()
+    register = Register()
+    indexing_listener = IndexingdUMLeListener(register)
     listener = BasicdUMLeListener()
+    walker.walk(indexing_listener, tree)
     walker.walk(listener, tree)
-    generate_output()
+    # print(register.scopes)
+    # generate_output()
 
 
 def main(argv):
