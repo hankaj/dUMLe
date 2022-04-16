@@ -16,7 +16,7 @@ class IndexingdUMLeListener(dUMLeListener):
         self.current_scope_name = fun_name
 
     def register_diagram_creation(self, ctx):
-        diag_name = ctx.NAME().getText(0)
+        diag_name = ctx.NAME().getText()
         self.register.add_object_to_scope(diag_name, self.current_scope_name)
         diag_scope = Scope(diag_name, self.current_scope_name, [], {})
         self.register.scopes[diag_name] = diag_scope
