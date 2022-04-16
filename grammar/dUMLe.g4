@@ -10,22 +10,22 @@ diagcreation
     
 class_diagram
     : 'diagclass' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL*)+;
+    (NL* IND+ instruction BR* NL*)+;
 
 seq_diagram
     : 'diagseq' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL*)+;
+    (NL* IND+ instruction BR* NL*)+;
 
 use_case_diagram
     : 'diagusecase' BR+ NAME BR* ':' BR* NL
-    (IND+ instruction BR* NL*)+;
+    (NL* IND+ instruction BR* NL*)+;
     
 instruction
     : obj_declaration
     | list_declaration
     | list_access
     | named_list_declaration
-    | fun_declaraion
+    | fun_declaration
     | fun_call
     | execution
     | loop
@@ -50,9 +50,9 @@ list_access
 named_list_declaration
     : NAME BR+ (fun_call | list_declaration) BR* NL;
 
-fun_declaraion
+fun_declaration
     : 'def' BR+ NAME '(' BR* arg_list BR* ')' BR* ':' BR* NL
-        (IND+ instruction NL*)*
+        (NL* IND+ instruction NL*)*
         IND+ 'return' BR+ list_declaration BR* NL;
         
 fun_call
@@ -63,7 +63,7 @@ execution
     
 loop
     : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access | fun_call) BR* ':' BR* NL
-        (IND+ instruction NL)+;
+        (NL* IND+ instruction NL*)+;
         
 connection
     : (NAME | obj_access | list_access) BR+ (ARROW | CONNECTION_TYPE) BR+ (NAME | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
@@ -79,26 +79,22 @@ class_declaration
     (class_declaration_line)+;
 
 class_declaration_line:
-    IND+ (MODIFIER BR+)? TEXT BR* NL;
+    NL* IND+ (MODIFIER BR+)? TEXT BR* NL*;
 
 note
     : 'note' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ TEXT BR* NL)+;
+    (NL* IND+ TEXT BR* NL*)+;
 
 actor
     : 'actor' (BR+ NAME)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
 
 theme
     : 'theme' BR+ NAME BR* ':' BR* NL
-    (IND+ PARAM_TYPE BR+ TEXT BR* NL)+;
+    (NL* IND+ PARAM_TYPE BR+ TEXT BR* NL*)+;
 
 package_declaration
     : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ (NAME | obj_access | list_access) BR* NL)+;
-    
-//interface_declaration
-//    : 'interface' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-//    (IND+ TEXT BR* NL)+;
+    (NL* IND+ (NAME | obj_access | list_access) BR* NL*)+;
 
 arg_list
     : (NAME BR* (',' BR* NAME)*)?;
@@ -108,7 +104,7 @@ block
 
 use_case
     : 'usecase' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (IND+ TEXT BR* NL)+;
+    (NL* IND+ TEXT BR* NL*)+;
 
 CLASS_TYPE
     : 'class'

@@ -1,4 +1,4 @@
-# Generated from dUMLe.g4 by ANTLR 4.9.3
+# Generated from /Users/hania/Desktop/komp22-dumle/grammar/dUMLe.g4 by ANTLR 4.9.2
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .dUMLeParser import dUMLeParser
@@ -98,12 +98,12 @@ class dUMLeListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dUMLeParser#fun_declaraion.
-    def enterFun_declaraion(self, ctx:dUMLeParser.Fun_declaraionContext):
+    # Enter a parse tree produced by dUMLeParser#fun_declaration.
+    def enterFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
         pass
 
-    # Exit a parse tree produced by dUMLeParser#fun_declaraion.
-    def exitFun_declaraion(self, ctx:dUMLeParser.Fun_declaraionContext):
+    # Exit a parse tree produced by dUMLeParser#fun_declaration.
+    def exitFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
         pass
 
 
