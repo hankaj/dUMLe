@@ -15,8 +15,36 @@ class IndexingdUMLeListener(dUMLeListener):
         self.register.scopes[fun_name] = fun_scope
         self.current_scope_name = fun_name
 
-    def exitFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
+    def register_diagram_creation(self, ctx):
+        diag_name = ctx.NAME().getText(0)
+        self.register.add_object_to_scope(diag_name, self.current_scope_name)
+        diag_scope = Scope(diag_name, self.current_scope_name, [], {})
+        self.register.scopes[diag_name] = diag_scope
+        self.current_scope_name = diag_name
+
+    def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
+
+    def enterClass_diagram(self, ctx:dUMLeParser.Class_diagramContext):
+        self.register_diagram_creation(ctx)
+
+    def enterUse_case_diagram(self, ctx:dUMLeParser.Use_case_diagramContext):
+        self.register_diagram_creation(ctx)
+
+    def enterSeq_diagram(self, ctx:dUMLeParser.Seq_diagramContext):
+        self.register_diagram_creation(ctx)
+
+    def exitFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
+        self.exit_scope()
+
+    def exitClass_diagram(self, ctx:dUMLeParser.Class_diagramContext):
+        self.exit_scope()
+
+    def exitUse_case_diagram(self, ctx:dUMLeParser.Use_case_diagramContext):
+        self.exit_scope()
+
+    def exitSeq_diagram(self, ctx:dUMLeParser.Seq_diagramContext):
+        self.exit_scope()
 
     def enterActor(self, ctx:dUMLeParser.ActorContext):
         self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
