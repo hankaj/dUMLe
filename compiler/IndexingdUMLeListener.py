@@ -10,7 +10,7 @@ class IndexingdUMLeListener(dUMLeListener):
 
     def enterFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
         fun_name = ctx.NAME().getText()
-        self.register.add_function_to_scope(fun_name, "", self.current_scope_name) # todo add try block
+        self.register.add_function_to_scope(fun_name, "", self.current_scope_name) # todo add try block | add function body
         fun_scope = Scope(fun_name, self.current_scope_name, [], {})
         self.register.scopes[fun_name] = fun_scope
         self.current_scope_name = fun_name

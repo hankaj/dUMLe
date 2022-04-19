@@ -1,13 +1,16 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
+from compiler.utils.object import Theme, Actor, UseCase
+from compiler.utils.register import Register
 
 
 class BasicdUMLeListener(dUMLeListener):
-    def __init__(self):
+    def __init__(self, register: Register):
         self.is_in_class_diag = False
         self.is_in_class = False
         self.output = ""
         self.themes = {}
+        self.register = register
 
     def update_output(self, string_to_add):
         self.output += string_to_add
@@ -26,9 +29,11 @@ class BasicdUMLeListener(dUMLeListener):
         if str(ctx.NAME()) in self.themes.keys():
             raise Exception("This theme is already declared") # todo: add proper exception
 
-        theme_code = ""
+        theme = Theme(self, ctx)
+        theme_code = theme.generate()
         # todo: implement theme here
         self.themes[str(ctx.NAME())] = theme_code
+        self.update_output(theme_code)
 
     def exitTheme(self, ctx:dUMLeParser.ThemeContext):
         pass
@@ -93,3 +98,21 @@ class BasicdUMLeListener(dUMLeListener):
         for line in ctx.TEXT():
             self.update_output("  " + line.getText()[1:-1] + "\n")
         self.update_output("end note\n")
+
+    # Enter a parse tree produced by dUMLeParser#actor.
+    def enterActor(self, ctx:dUMLeParser.ActorContext):
+        actor = Actor(self, ctx)
+        actor_code = actor.generate()
+        self.update_output(actor_code + '\n')
+
+    # Exit a parse tree produced by dUMLeParser#actor.
+    def exitActor(self, ctx:dUMLeParser.ActorContext):
+        pass
+
+        # Enter a parse tree produced by dUMLeParser#use_case.
+
+    def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
+        useCase = UseCase(self,ctx)
+        useCase_code = useCase.generate()
+        self.update_output(useCase_code)
+        pass

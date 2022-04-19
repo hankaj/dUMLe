@@ -22,11 +22,11 @@ def execute_dumle(input_stream):
     walker = ParseTreeWalker()
     register = Register()
     indexing_listener = IndexingdUMLeListener(register)
-    listener = BasicdUMLeListener()
+    listener = BasicdUMLeListener(indexing_listener.register)
     walker.walk(indexing_listener, tree)
     walker.walk(listener, tree)
     # print(register.scopes)
-    # generate_output()
+    generate_output()
 
 
 def main(argv):

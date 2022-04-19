@@ -37,7 +37,7 @@ class Theme(Object):
     def process(self):
         # name = self.ctx.NAME().getText()
         for i in range(len(self.ctx.PARAM_TYPE())):
-            self.values.append((self.ctx.PARAM_TYPE()[i].getText(), self.ctx.TEXT()[i].getText()))
+            self.values.append((self.ctx.PARAM_TYPE()[i].getText(), self.ctx.TEXT()[i].getText().replace('"', '')))
 
     def generate(self):
         self.process()
@@ -113,7 +113,11 @@ class Block(Object):
 
 
     def generate(self):
-        pass
+        self.process()
+        res = "block :" + str(self.blockName) + ":"
+        if self.label != "":
+            res += ' as ' + self.label
+        return res
 
 
 class ClassDeclaration(Object):
