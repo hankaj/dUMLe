@@ -85,8 +85,8 @@ class UseCase(Object):
         self.process()
         res = 'usecase ('
         for i in range(len(self.content)):
-            res += str(self.content[i]) + '\n'
-        res += ')'
+            res += str(self.content[i])
+        res += ')\n'
         return res
 
 
