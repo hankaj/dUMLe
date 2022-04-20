@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from compiler.dUMLeParser import dUMLeParser
+
 
 class Object(ABC):
     @abstractmethod
@@ -25,7 +27,7 @@ class Note(Object):
         pass
 
     def generate(self):
-        pass
+        return ""
 
 
 class Theme(Object):
@@ -47,17 +49,37 @@ class Theme(Object):
         return res
 
 
-# done in BasicListener??
 class Connection(Object):
-    def __init__(self, listener, ctx):
+    def __init__(self, listener, ctx: dUMLeParser.ConnectionContext):
         self.listener = listener
         self.ctx = ctx
+        self.obj1_name = ""
+        self.obj2_name = ""
 
     def process(self):
-        pass
+        self.obj1_name = self.ctx.NAME(0)
+        self.obj2_name = self.ctx.NAME(1)
 
     def generate(self):
-        pass
+        result = ""
+        if self.ctx.ARROW():
+            arrow = str(self.ctx.ARROW())
+        else:
+            arrows = {"aggregate": "o--",
+                      "inherit": "<|--",
+                      "implement": "<|..",
+                      "associate": "<--",
+                      "depend": "<..",
+                      "compose": "*--"}
+            arrow = arrows[self.ctx.CONNECTION_TYPE().getText()]
+
+        result += str(self.obj1_name) + " " + arrow + " " + str(self.obj2_name)
+
+        if self.ctx.TEXT():
+            result += " : " + str(self.ctx.TEXT())[1:-1]
+
+        result += "\n"
+        return result
 
 
 class UseCase(Object):
@@ -111,7 +133,6 @@ class Block(Object):
         if self.ctx.TEXT():
             self.label = str(self.ctx.TEXT()).replace('"', '')
 
-
     def generate(self):
         self.process()
         res = "block :" + str(self.blockName) + ":"
@@ -121,15 +142,29 @@ class Block(Object):
 
 
 class ClassDeclaration(Object):
-    def __init__(self, listener, ctx):
+    def __init__(self, listener, ctx: dUMLeParser.Class_declarationContext):
         self.listener = listener
         self.ctx = ctx
+        self.name = ""
+        self.theme = ""
 
     def process(self):
-        pass
+        if len(self.ctx.NAME()) == 2:
+            self.theme = str(self.ctx.NAME()[0])
+            self.name = str(self.ctx.NAME()[1])
+        else:
+            self.name = str(self.ctx.NAME()[0])
 
     def generate(self):
-        pass
+        result = "class " + self.name + " {\n"
+        for class_declaration_line in self.ctx.class_declaration_line():
+            if class_declaration_line.MODIFIER():
+                access_type = {"private": "-", "public": "+", "protected": "#"}
+                result += (access_type[str(class_declaration_line.MODIFIER())])
+            result += str(class_declaration_line.TEXT())[1:-1] + "\n"
+
+        result += "}\n"
+        return result
 
 
 class Actor(Object):
@@ -175,4 +210,4 @@ class Package(Object):
         pass
 
     def generate(self):
-        pass
+        return ""
