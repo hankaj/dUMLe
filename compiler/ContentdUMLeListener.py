@@ -47,8 +47,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterActor(self, ctx: dUMLeParser.ActorContext):
         if self.is_in_function:
-            actor = Actor(self, ctx)
-            actor.process()
+            actor = Actor(ctx)
             self.register.update_function_in_scope(self.current_function_name, actor.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output
@@ -56,8 +55,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
         if self.is_in_function:
-            use_case = UseCase(self, ctx)
-            use_case.process()
+            use_case = UseCase(ctx)
             self.register.update_function_in_scope(self.current_function_name, use_case.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output
@@ -65,8 +63,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterBlock(self, ctx: dUMLeParser.BlockContext):
         if self.is_in_function:
-            block = Block(self, ctx)
-            block.process()
+            block = Block(ctx)
             self.register.update_function_in_scope(self.current_function_name, block.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output
@@ -74,8 +71,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
         if self.is_in_function:
-            note = Note(self, ctx)
-            note.process()
+            note = Note(ctx)
             self.register.update_function_in_scope(self.current_function_name, note.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output
@@ -87,8 +83,7 @@ class ContentdUMLeListener(dUMLeListener):
                 raise Exception("Object \"" + name.getText() + "\" is not declared in scope \"" + self.current_scope_name + "\"")
 
         if self.is_in_function:
-            connection = Connection(self, ctx)
-            connection.process()
+            connection = Connection(ctx)
             self.register.update_function_in_scope(self.current_function_name, connection.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output
@@ -107,8 +102,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
         if self.is_in_function:  # todo: check if proper scope for package objects
-            package = Package(self, ctx)
-            package.process()
+            package = Package(ctx)
             self.register.update_function_in_scope(self.current_function_name, package.generate(),
                                                    self.current_scope_name)
         else:
@@ -117,8 +111,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
         if self.is_in_function:
-            class_declaration = ClassDeclaration(self, ctx)
-            class_declaration.process()
+            class_declaration = ClassDeclaration(ctx)
             self.register.update_function_in_scope(self.current_function_name, class_declaration.generate(), self.current_scope_name)
         else:
             # todo: add generator for multiple output

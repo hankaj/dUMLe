@@ -29,7 +29,7 @@ class ExecutiondUMLeListener(dUMLeListener):
     # global
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
-        theme = Theme(self, ctx)
+        theme = Theme(ctx)
         theme_code = theme.generate()
         self.themes[str(ctx.NAME())] = theme_code
         self.update_output(theme_code)
@@ -77,8 +77,7 @@ class ExecutiondUMLeListener(dUMLeListener):
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
         if not self.is_in_function:
-            class_declaration = ClassDeclaration(self, ctx)
-            class_declaration.process()
+            class_declaration = ClassDeclaration(ctx)
             self.update_output(class_declaration.generate())
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
@@ -87,8 +86,7 @@ class ExecutiondUMLeListener(dUMLeListener):
                 if not self.register.is_object_in_scope(name.getText(), self.current_scope_name):
                     raise Exception(
                         "Object \"" + name.getText() + "\" is not declared in scope \"" + self.current_scope_name + "\"")
-            connection = Connection(self, ctx)
-            connection.process()
+            connection = Connection(ctx)
             self.update_output(connection.generate() + '\n')
 
     def exitNote(self, ctx: dUMLeParser.NoteContext):
@@ -99,11 +97,11 @@ class ExecutiondUMLeListener(dUMLeListener):
         pass
 
     def enterActor(self, ctx: dUMLeParser.ActorContext):
-        actor = Actor(self, ctx)
+        actor = Actor(ctx)
         actor_code = actor.generate()
         self.update_output(actor_code + '\n')
 
     def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
-        use_case = UseCase(self, ctx)
+        use_case = UseCase(ctx)
         use_case = use_case.generate()
         self.update_output(use_case + '\n')

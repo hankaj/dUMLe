@@ -5,12 +5,7 @@ from compiler.dUMLeParser import dUMLeParser
 
 class Object(ABC):
     @abstractmethod
-    def __init__(self, listener, ctx):
-        self.listener = listener
-        self.ctx = ctx
-
-    @abstractmethod
-    def process(self):
+    def __init__(self, ctx: dUMLeParser):
         pass
 
     @abstractmethod
@@ -19,30 +14,25 @@ class Object(ABC):
 
 
 class Note(Object):
-    def __init__(self, listener, ctx):
-        self.listener = listener
-        self.ctx = ctx
+    def __init__(self, ctx: dUMLeParser.NoteContext):
 
-    def process(self):
-        pass
+        self.res = "note left\n"
+        for line in ctx.TEXT():
+            self.res += ("  " + line.getText()[1:-1] + "\n")
 
     def generate(self):
-        return ""
+        self.res += "end note\n"
+        return self.res
 
 
 class Theme(Object):
-    def __init__(self, listener, ctx):
-        self.listener = listener
-        self.ctx = ctx
+    def __init__(self, ctx: dUMLeParser.ThemeContext):
         self.values = []
 
-    def process(self):
-        # name = self.ctx.NAME().getText()
-        for i in range(len(self.ctx.PARAM_TYPE())):
-            self.values.append((self.ctx.PARAM_TYPE()[i].getText(), self.ctx.TEXT()[i].getText().replace('"', '')))
+        for i in range(len(ctx.PARAM_TYPE())):
+            self.values.append((ctx.PARAM_TYPE()[i].getText(),ctx.TEXT()[i].getText().replace('"', '')))
 
     def generate(self):
-        self.process()
         res = ""
         for i in range(len(self.values)):
             res += 'skinparam ' + str(self.values[i][0]) + ' ' + str(self.values[i][1]) + '\n'
@@ -50,20 +40,17 @@ class Theme(Object):
 
 
 class Connection(Object):
-    def __init__(self, listener, ctx: dUMLeParser.ConnectionContext):
-        self.listener = listener
-        self.ctx = ctx
-        self.obj1_name = ""
-        self.obj2_name = ""
-
-    def process(self):
-        self.obj1_name = self.ctx.NAME(0)
-        self.obj2_name = self.ctx.NAME(1)
+    def __init__(self, ctx: dUMLeParser.ConnectionContext):
+        self.obj1_name = ctx.NAME()[0]
+        self.obj2_name = ctx.NAME()[1]
+        self.arrow = ctx.ARROW()
+        self.connection_type = ctx.CONNECTION_TYPE().getText()
+        self.content = ctx.TEXT()
 
     def generate(self):
         result = ""
-        if self.ctx.ARROW():
-            arrow = str(self.ctx.ARROW())
+        if self.arrow:
+            arrow = str(self.arrow)
         else:
             arrows = {"aggregate": "o--",
                       "inherit": "<|--",
@@ -71,40 +58,33 @@ class Connection(Object):
                       "associate": "<--",
                       "depend": "<..",
                       "compose": "*--"}
-            arrow = arrows[self.ctx.CONNECTION_TYPE().getText()]
+            arrow = arrows[self.connection_type]
 
         result += str(self.obj1_name) + " " + arrow + " " + str(self.obj2_name)
 
-        if self.ctx.TEXT():
-            result += " : " + str(self.ctx.TEXT())[1:-1]
+        if self.content:
+            result += " : " + str(self.content)[1:-1]
 
         result += "\n"
         return result
 
 
 class UseCase(Object):
-    def __init__(self, listener, ctx):
-        self.listener = listener
-        self.ctx = ctx
-        self.names = []
+    def __init__(self, ctx: dUMLeParser.Use_caseContext):
         self.content = []
         self.useCaseName = ""
         self.themeName = ""
 
-    def process(self):
-        self.names = str(self.ctx.NAME())
-
-        if len(self.names) == 2:
-            self.themeName = self.names[0]
-            self.useCaseName = self.names[1]
+        if len(ctx.NAME()) == 2:
+            self.themeName = ctx.NAME()[0]
+            self.useCaseName = ctx.NAME()[1]
         else:
-            self.useCaseName = self.names[0]
+            self.useCaseName = ctx.NAME()[0]
 
-        for line in self.ctx.TEXT():
+        for line in ctx.TEXT():
             self.content.append(line)
 
     def generate(self):
-        self.process()
         res = 'usecase ('
         for i in range(len(self.content)):
             res += str(self.content[i])
@@ -113,28 +93,19 @@ class UseCase(Object):
 
 
 class Block(Object):
-    def __init__(self, listener, ctx):
-        self.names = []
-        self.blockName = ""
+    def __init__(self, ctx: dUMLeParser.BlockContext):
         self.themeName = ""
-        self.label = ""
-        self.listener = listener
-        self.ctx = ctx
 
-    def process(self):
-        self.names = self.ctx.NAME()
-
-        if len(self.names) == 2:
-            self.themeName = str(self.names[0])
-            self.blockName = str(self.names[1])
+        if len(ctx.NAME()) == 2:
+            self.themeName = str(ctx.NAME()[0])
+            self.blockName = str(ctx.NAME()[1])
         else:
-            self.blockName = str(self.names[0])
+            self.blockName = str(ctx.NAME()[0])
 
-        if self.ctx.TEXT():
-            self.label = str(self.ctx.TEXT()).replace('"', '')
+        if ctx.TEXT():
+            self.label = str(ctx.TEXT()).replace('"', '')
 
     def generate(self):
-        self.process()
         res = "block :" + str(self.blockName) + ":"
         if self.label != "":
             res += ' as ' + self.label
@@ -142,22 +113,18 @@ class Block(Object):
 
 
 class ClassDeclaration(Object):
-    def __init__(self, listener, ctx: dUMLeParser.Class_declarationContext):
-        self.listener = listener
-        self.ctx = ctx
-        self.name = ""
+    def __init__(self, ctx: dUMLeParser.Class_declarationContext):
         self.theme = ""
-
-    def process(self):
-        if len(self.ctx.NAME()) == 2:
-            self.theme = str(self.ctx.NAME()[0])
-            self.name = str(self.ctx.NAME()[1])
+        self.class_line = ctx.class_declaration_line()
+        if len(ctx.NAME()) == 2:
+            self.theme = str(ctx.NAME()[0])
+            self.name = str(ctx.NAME()[1])
         else:
-            self.name = str(self.ctx.NAME()[0])
+            self.name = str(ctx.NAME()[0])
 
     def generate(self):
         result = "class " + self.name + " {\n"
-        for class_declaration_line in self.ctx.class_declaration_line():
+        for class_declaration_line in self.class_line:
             if class_declaration_line.MODIFIER():
                 access_type = {"private": "-", "public": "+", "protected": "#"}
                 result += (access_type[str(class_declaration_line.MODIFIER())])
@@ -168,27 +135,20 @@ class ClassDeclaration(Object):
 
 
 class Actor(Object):
-    def __init__(self, listener, ctx):
-        self.names = ctx.NAME()
-        self.listener = listener
-        self.ctx = ctx
-        self.actorName = ""
+    def __init__(self, ctx: dUMLeParser.ActorContext):
         self.themeName = ""
-        self.label = ""
 
-    def process(self):
-        if len(self.names) == 2:
+        if len(ctx.NAME()) == 2:
             # theme is used in object
-            self.actorName = str(self.names[0])
-            self.actorName = str(self.names[1])
+            self.actorName = str(ctx.NAME()[0])
+            self.actorName = str(ctx.NAME()[1])
         else:
-            self.actorName = str(self.names[0])
+            self.actorName = str(ctx.NAME()[0])
 
-        if self.ctx.TEXT():
-            self.label = str(self.ctx.TEXT()).replace('"', '')
+        if ctx.TEXT():
+            self.label = str(ctx.TEXT()).replace('"', '')
 
     def generate(self):
-        self.process()
         res = "actor :" + str(self.actorName) + ":"
         if self.label != "":
             res += ' as ' + self.label
@@ -196,18 +156,12 @@ class Actor(Object):
 
 
 class Package(Object):
-    def __init__(self, listener, ctx):
-        self.listener = listener
-        self.ctx = ctx
+    def __init__(self, ctx: dUMLeParser.Package_declarationContext):
+
         self.packageName = ""
         self.themeName = ""
         self.names = []
         self.objects = []
-
-    def process(self):
-        self.names = self.ctx.NAME()
-
-        pass
 
     def generate(self):
         return ""
