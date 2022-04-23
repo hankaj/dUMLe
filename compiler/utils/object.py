@@ -15,14 +15,13 @@ class Object(ABC):
 
 class Note(Object):
     def __init__(self, ctx: dUMLeParser.NoteContext):
-
-        self.res = "note left\n"
+        self.noteCode = "note left\n"
         for line in ctx.TEXT():
-            self.res += ("  " + line.getText()[1:-1] + "\n")
+            self.noteCode += ("  " + line.getText()[1:-1] + "\n")
 
     def generate(self):
-        self.res += "end note\n"
-        return self.res
+        self.noteCode += "end note\n"
+        return self.noteCode
 
 
 class Theme(Object):
@@ -95,6 +94,8 @@ class UseCase(Object):
 class Block(Object):
     def __init__(self, ctx: dUMLeParser.BlockContext):
         self.themeName = ""
+        self.blockName = ""
+        self.label = ""
 
         if len(ctx.NAME()) == 2:
             self.themeName = str(ctx.NAME()[0])
@@ -115,7 +116,9 @@ class Block(Object):
 class ClassDeclaration(Object):
     def __init__(self, ctx: dUMLeParser.Class_declarationContext):
         self.theme = ""
+        self.name = ""
         self.class_line = ctx.class_declaration_line()
+
         if len(ctx.NAME()) == 2:
             self.theme = str(ctx.NAME()[0])
             self.name = str(ctx.NAME()[1])
@@ -137,10 +140,12 @@ class ClassDeclaration(Object):
 class Actor(Object):
     def __init__(self, ctx: dUMLeParser.ActorContext):
         self.themeName = ""
+        self.actorName = ""
+        self.label = ""
 
         if len(ctx.NAME()) == 2:
             # theme is used in object
-            self.actorName = str(ctx.NAME()[0])
+            self.themeName = str(ctx.NAME()[0])
             self.actorName = str(ctx.NAME()[1])
         else:
             self.actorName = str(ctx.NAME()[0])
