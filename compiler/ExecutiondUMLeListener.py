@@ -32,6 +32,7 @@ class ExecutiondUMLeListener(dUMLeListener):
         theme = Theme(ctx)
         theme_code = theme.generate()
         self.themes[str(ctx.NAME())] = theme_code
+        # tak powinno być?
         self.update_output(theme_code)
 
     # function
@@ -46,12 +47,11 @@ class ExecutiondUMLeListener(dUMLeListener):
         self.is_in_function = False
 
     def enterFun_call(self, ctx: dUMLeParser.Fun_callContext):
-        fun_name = ctx.NAME().getText()
+        fun_name = ctx.name().getText()
         if not self.register.is_function_in_scope(fun_name, self.current_scope_name):
             raise Exception(
                 "Function \"" + fun_name + "\" is not declared in scope \"" + self.current_scope_name + "\"")
-
-        self.update_output(self.register.get_function_body_in_scope(fun_name, self.current_scope_name))
+        #self.update_output(self.register.get_function_body_in_scope(fun_name, self.current_scope_name))
 
     # diagram
 
@@ -82,7 +82,7 @@ class ExecutiondUMLeListener(dUMLeListener):
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
         if not self.is_in_function:
-            for name in ctx.NAME():
+            for name in ctx.name():
                 if not self.register.is_object_in_scope(name.getText(), self.current_scope_name):
                     raise Exception(
                         "Object \"" + name.getText() + "\" is not declared in scope \"" + self.current_scope_name + "\"")

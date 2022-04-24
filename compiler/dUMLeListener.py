@@ -224,6 +224,15 @@ class dUMLeListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dUMLeParser#arg_list_include_scope.
+    def enterArg_list_include_scope(self, ctx:dUMLeParser.Arg_list_include_scopeContext):
+        pass
+
+    # Exit a parse tree produced by dUMLeParser#arg_list_include_scope.
+    def exitArg_list_include_scope(self, ctx:dUMLeParser.Arg_list_include_scopeContext):
+        pass
+
+
     # Enter a parse tree produced by dUMLeParser#block.
     def enterBlock(self, ctx:dUMLeParser.BlockContext):
         pass
@@ -239,6 +248,15 @@ class dUMLeListener(ParseTreeListener):
 
     # Exit a parse tree produced by dUMLeParser#use_case.
     def exitUse_case(self, ctx:dUMLeParser.Use_caseContext):
+        pass
+
+
+    # Enter a parse tree produced by dUMLeParser#name.
+    def enterName(self, ctx:dUMLeParser.NameContext):
+        pass
+
+    # Exit a parse tree produced by dUMLeParser#name.
+    def exitName(self, ctx:dUMLeParser.NameContext):
         pass
 
 

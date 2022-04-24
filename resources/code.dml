@@ -1,25 +1,5 @@
-def fun1():
-    class M1:
-        private "void print()"
-    class M2:
-        public "void helloWorld()"
-    M1 implement M2
-    return []
-
-def fun2():
-    class M3:
-        private "void print()"
-    class M4:
-        public "void helloWorld()"
-    M3 implement M4
-    return []
-
 diagclass CLASS:
-
-    fun1()
-
-    fun2()
-
+    name fun1()
     class M5:
         protected "int size1"
 
@@ -28,4 +8,21 @@ diagclass CLASS:
 
     M6 aggregate M5
 
-    exec
+    exec CLASS
+
+def fun1():
+    klasa fun1()
+    class M1B:
+        private "void print()"
+    class M2:
+        public "void helloWorld()"
+    M1B implement klasa[0]
+    return [object]
+
+def fun2():
+    class M3:
+        private "void print()"
+    class M4:
+        public "void helloWorld()"
+    M3 implement M4
+    return []

@@ -1,17 +1,20 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.register import Register, Scope
+from compiler.utils.register import Register, Scope, FunctionDescriptor
+from compiler.utils.error_message import ErrorMessage
 
 
 class IndexingdUMLeListener(dUMLeListener):
-    def __init__(self, register: Register):
+    def __init__(self, register: Register, error: ErrorMessage):
         self.register = register
+        self.error = error
         self.current_scope_name = register.global_scope.name
         self.is_in_function = False
 
     def register_diagram_creation(self, ctx):
         if self.is_in_function:
-            raise Exception("Cannot create diagram inside the function")
+            self.error.errors.append("Cannot create diagram inside the function")
+            return
 
         diag_name = ctx.NAME().getText()
         self.register.add_object_to_scope(diag_name, self.current_scope_name)
@@ -24,12 +27,23 @@ class IndexingdUMLeListener(dUMLeListener):
 
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         if self.is_in_function:
-            raise Exception("Functions cannot be nested")
+            self.error.errors.append("Functions cannot be nested")
+            return
 
         self.is_in_function = True
         fun_name = ctx.NAME().getText()
-        self.register.add_function_to_scope(fun_name, "", self.current_scope_name)
+
+        if ctx.arg_list(1) is None:
+            n_arguments = 0
+            n_returns = len(ctx.arg_list(0).NAME())
+        else:
+            n_arguments = len(ctx.arg_list(0).NAME())
+            n_returns = len(ctx.arg_list(1).NAME())
+
+        function_descriptor = FunctionDescriptor(n_arguments, n_returns)
         fun_scope = Scope(fun_name, self.current_scope_name, [], {})
+
+        self.register.add_function_to_scope(fun_name, function_descriptor, self.current_scope_name)
         self.register.scopes[fun_name] = fun_scope
         self.current_scope_name = fun_name
 
@@ -56,22 +70,22 @@ class IndexingdUMLeListener(dUMLeListener):
         self.exit_scope()
 
     def enterActor(self, ctx: dUMLeParser.ActorContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterBlock(self, ctx: dUMLeParser.BlockContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
         self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
-        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)

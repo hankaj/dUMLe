@@ -5,7 +5,9 @@ from compiler.dUMLeParser import dUMLeParser
 from compiler.ExecutiondUMLeListener import ExecutiondUMLeListener
 from compiler.IndexingdUMLeListener import IndexingdUMLeListener
 from compiler.ContentdUMLeListener import ContentdUMLeListener
+from compiler.ValidatingdUMLeListener import ValidatingdUMLeListener
 from compiler.utils.register import Register
+from compiler.utils.error_message import ErrorMessage
 from plantuml import PlantUML
 
 
@@ -16,20 +18,36 @@ def generate_output():
 
 
 def execute_dumle(input_stream):
+    # creating objects
+    error = ErrorMessage([])
     lexer = dUMLeLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = dUMLeParser(stream)
     tree = parser.program()
     walker = ParseTreeWalker()
     register = Register()
-    indexing_listener = IndexingdUMLeListener(register)
-    # print(register.scopes)
+
+    # validating the code
+    indexing_listener = IndexingdUMLeListener(register, error)
+    validating_listener = ValidatingdUMLeListener(register, error)
+    print("Indexing...")
+    walker.walk(indexing_listener, tree)
+    print("Validating...")
+    walker.walk(validating_listener, tree)
+    if error.errors:
+        print("Fix the following errors:")
+        print(error.errors)
+        return
+
+    return
+
+    # code execution
     content_listener = ContentdUMLeListener(register)
     execution_listener = ExecutiondUMLeListener(register)
-    walker.walk(indexing_listener, tree)
     walker.walk(content_listener, tree)
     walker.walk(execution_listener, tree)
 
+    # generating final result
     generate_output()
 
 

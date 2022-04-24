@@ -14,6 +14,8 @@ class OutputGenerator:
     """ docs for OutputGenerator"""
 
     def __init__(self):
+        global_object = {}
+        functions = {}
         diagrams = {}
 
     def generate(self, diag_name: str, mode: Mode, object_list: List, output_filename: str) -> None:

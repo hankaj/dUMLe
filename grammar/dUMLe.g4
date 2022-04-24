@@ -26,7 +26,6 @@ instruction
     | list_access
     | named_list_declaration
     | fun_declaration
-    | fun_call
     | execution
     | loop
     | connection
@@ -42,69 +41,75 @@ obj_declaration
     | use_case;
 
 list_declaration
-    : '[' BR* ((NAME | obj_access) BR* (',' BR* (NAME | obj_access))*)? BR* ']';
+    : '[' BR* ((name | obj_access) BR* (',' BR* (name | obj_access))*)? BR* ']';
     
 list_access
-    : NAME '[' DIGIT+ ']' BR*;
+    : name '[' DIGIT+ ']' BR*;
     
 named_list_declaration
-    : NAME BR+ (fun_call | list_declaration) BR* NL;
+    : arg_list BR+ '=' BR+ (fun_call | list_declaration) BR* NL;
 
 fun_declaration
-    : 'def' BR+ NAME '(' BR* arg_list BR* ')' BR* ':' BR* NL
+    : 'def' BR+ NAME '(' BR* arg_list* BR* ')' BR* ':' BR* NL
         (NL* IND+ instruction NL*)*
-        IND+ 'return' BR+ list_declaration BR* NL;
+        IND+ 'return' BR+ arg_list BR* NL;
         
 fun_call
-    : NAME '(' BR* arg_list BR* ')' BR*;
+    : name '(' BR* arg_list_include_scope BR* ')' BR*;
 
 execution
     : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | list_access | NAME | obj_access))? (BR+ TEXT)? BR* NL;
-    
+
 loop
-    : 'for' BR+ NAME BR+ 'in' BR+ (NAME | list_declaration | obj_access | fun_call) BR* ':' BR* NL
+    : 'for' BR+ NAME BR+ 'in' BR+ (name | list_declaration | obj_access | fun_call) BR* ':' BR* NL
         (NL* IND+ instruction NL*)+;
         
 connection
-    : (NAME | obj_access | list_access) BR+ (ARROW | CONNECTION_TYPE) BR+ (NAME | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
+    : (name | obj_access | list_access) BR+ (ARROW | CONNECTION_TYPE) BR+ (name | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
     
 block_operation
-    : BLOCK_OPERATION_TYPE BR+ (NAME | obj_access | list_access) BR* NL;
+    : BLOCK_OPERATION_TYPE BR+ (name | obj_access | list_access) BR* NL;
     
 obj_access
-    : NAME '.' (NAME | obj_access);
+    : name '.' (name | obj_access);
 
 class_declaration
-    : CLASS_TYPE (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    : CLASS_TYPE (BR+ name)? BR+ NAME BR* ':' BR* NL
     (class_declaration_line)+;
 
 class_declaration_line:
     NL* IND+ (MODIFIER BR+)? TEXT BR* NL*;
 
 note
-    : 'note' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    : 'note' (BR+ name)? BR+ NAME BR* ':' BR* NL
     (NL* IND+ TEXT BR* NL*)+;
 
 actor
-    : 'actor' (BR+ NAME)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
+    : 'actor' (BR+ name)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
 
 theme
     : 'theme' BR+ NAME BR* ':' BR* NL
     (NL* IND+ PARAM_TYPE BR+ TEXT BR* NL*)+;
 
 package_declaration
-    : 'package' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
-    (NL* IND+ (NAME | obj_access | list_access) BR* NL*)+;
+    : 'package' (BR+ name)? BR+ NAME BR* ':' BR* NL
+    (NL* IND+ (name | obj_access | list_access) BR* NL*)+;
 
 arg_list
-    : (NAME BR* (',' BR* NAME)*)?;
+    : NAME BR* (',' BR* NAME)*;
+
+arg_list_include_scope
+    : (name BR* (',' BR* name)*)?;
     
 block
-    : 'block' (BR+ NAME)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
+    : 'block' (BR+ name)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
 
 use_case
-    : 'usecase' (BR+ NAME)? BR+ NAME BR* ':' BR* NL
+    : 'usecase' (BR+ name)? BR+ NAME BR* ':' BR* NL
     (NL* IND+ TEXT BR* NL*)+;
+
+name
+    : SCOPE_NAME?NAME;
 
 CLASS_TYPE
     : 'class'
@@ -151,7 +156,11 @@ DIGIT
 BR
     :
     ' ';
-    
+
+SCOPE_NAME
+    :
+    [A-Za-z_][a-zA-Z0-9_]*'&';
+
 NAME
     :
     [A-Za-z_][a-zA-Z0-9_]*;

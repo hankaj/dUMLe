@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from compiler.dUMLeParser import dUMLeParser
 
-
 class Object(ABC):
     @abstractmethod
     def __init__(self, ctx: dUMLeParser):
@@ -40,8 +39,8 @@ class Theme(Object):
 
 class Connection(Object):
     def __init__(self, ctx: dUMLeParser.ConnectionContext):
-        self.obj1_name = ctx.NAME()[0]
-        self.obj2_name = ctx.NAME()[1]
+        self.obj1_name = ctx.name()[0]
+        self.obj2_name = ctx.name()[1]
         self.arrow = ctx.ARROW()
         self.connection_type = ctx.CONNECTION_TYPE().getText()
         self.content = ctx.TEXT()
@@ -75,7 +74,7 @@ class UseCase(Object):
         self.themeName = ""
 
         if len(ctx.NAME()) == 2:
-            self.themeName = ctx.NAME()[0]
+            self.themeName = ctx.name()[0]
             self.useCaseName = ctx.NAME()[1]
         else:
             self.useCaseName = ctx.NAME()[0]

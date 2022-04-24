@@ -15,6 +15,7 @@ class ContentdUMLeListener(dUMLeListener):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
 
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
+        # po co to jest? ten wyjątek już chyba wcześniej wywali
         if self.is_in_function:
             raise Exception("Functions cannot be nested")
 
