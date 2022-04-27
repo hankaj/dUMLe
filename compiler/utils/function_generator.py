@@ -1,0 +1,52 @@
+from compiler.utils.register import FunctionDescriptor
+from compiler.utils.object import Object
+from copy import deepcopy
+from typing import List
+from compiler.dUMLeParser import dUMLeParser
+
+
+class FunctionGenerator:
+    def __init__(self, function_descriptor: FunctionDescriptor):
+        self.n_arguments = function_descriptor.n_arguments
+        self.n_returns = function_descriptor.n_returns
+        self.fixed_objects = []
+        self.modifiable_args = []
+        self.modifiable_arg_names = []
+        self.return_object_names = []
+        self.code_ctx_executed_in_call = {"activation": [], "connection": []}
+
+    def _process(self, args: List[Object]) -> None:
+        for i, arg in enumerate(args):
+            arg_copy = deepcopy(arg)
+            arg_copy.name = self.modifiable_arg_names[i]
+            self.modifiable_args.append(arg_copy)
+
+    def _exectute_connection_ctx(self, ctx : dUMLeParser.ConnectionContext):
+        # todo: write connection
+        pass
+
+    def _exectute_activation_ctx(self, ctx : dUMLeParser.Block_operationContext):
+        # todo: write activation
+        pass
+
+    def call(self, args) -> List[Object]:
+        self._process(args)
+
+        result = []
+        for result_object_name in self.return_object_names:
+            for fixed_object in self.fixed_objects:
+                if fixed_object.name == result_object_name:
+                    result.append(fixed_object)
+            for modifiable_arg in self.modifiable_args:
+                if modifiable_arg.name == result_object_name:
+                    result.append(modifiable_arg)
+
+        for operation, ctx_list in self.code_ctx_executed_in_call:
+            if operation == "activation":
+                for ctx in ctx_list:
+                    self._exectute_activation_ctx(ctx)
+            elif operation == "connection":
+                for ctx in ctx_list:
+                    self._exectute_connection_ctx(ctx)
+
+        return result

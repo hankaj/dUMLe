@@ -8,13 +8,12 @@ from compiler.ContentdUMLeListener import ContentdUMLeListener
 from compiler.ValidatingdUMLeListener import ValidatingdUMLeListener
 from compiler.utils.register import Register
 from compiler.utils.error_message import ErrorMessage
-from plantuml import PlantUML
 
 
-def generate_output():
-    outfile = "results/result.png"
-    server = PlantUML(url='http://www.plantuml.com/plantuml/img/')
-    server.processes_file(filename="results/output.txt", outfile=outfile)
+# def generate_output():
+#     outfile = "results/result.png"
+#     server = PlantUML(url='http://www.plantuml.com/plantuml/img/')
+#     server.processes_file(filename="results/output.txt", outfile=outfile)
 
 
 def execute_dumle(input_stream):
@@ -39,7 +38,7 @@ def execute_dumle(input_stream):
         print(error.errors)
         return
 
-    return
+    return  # todo: delete this
 
     # code execution
     content_listener = ContentdUMLeListener(register)

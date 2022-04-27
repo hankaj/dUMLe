@@ -2,25 +2,23 @@ from abc import ABC, abstractmethod
 from compiler.utils.output_generator import Mode
 from typing import List
 
-class DiagramGenerator(ABC):
+# class DiagramGenerator(ABC):
+#
+#     @abstractmethod
+#     def generate(self, mode: Mode, object_list: List):
+#         pass
 
-    @abstractmethod
-    def generate(self, mode: Mode, object_list: List):
-        pass
 
-
-class DiagClassGenerator(DiagramGenerator):
+class DiagGenerator:
     def __init__(self):
-        self.objects = {}
+        self.objects = []
 
-    def generate(self, mode: Mode, object_list: List[str] | None = None):
-        output = ""
-        if object_list is None:
-            self._generate_all()
-        for obj_name in object_list:
-            output += self.objects[obj_name].generate()
+    def generate(self, mode: Mode, object_list_names: List[str] | None = None) -> str:
+        # todo: support mode
+        if object_list_names is None:
+            return self._generate_all()
+        else:
+            return "".join(obj.generate() for obj in self.objects if obj.name in object_list_names)
 
-    def _generate_all(self):
-        output = ""
-        for obj_name, obj in self.objects.items():
-            output += obj.generate()
+    def _generate_all(self) -> str:
+        return "".join(obj.generate() for obj in self.objects)

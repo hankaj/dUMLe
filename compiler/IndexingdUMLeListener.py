@@ -10,6 +10,7 @@ class IndexingdUMLeListener(dUMLeListener):
         self.error = error
         self.current_scope_name = register.global_scope.name
         self.is_in_function = False
+        self.nested_function_counter = 0
 
     def register_diagram_creation(self, ctx):
         if self.is_in_function:
@@ -26,6 +27,7 @@ class IndexingdUMLeListener(dUMLeListener):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
 
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
+        self.nested_function_counter += 1
         if self.is_in_function:
             self.error.errors.append("Functions cannot be nested")
             return
@@ -57,8 +59,10 @@ class IndexingdUMLeListener(dUMLeListener):
         self.register_diagram_creation(ctx)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
-        self.is_in_function = False
-        self.exit_scope()
+        self.nested_function_counter -= 1
+        if self.nested_function_counter == 0:
+            self.is_in_function = False
+            self.exit_scope()
 
     def exitClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
         self.exit_scope()

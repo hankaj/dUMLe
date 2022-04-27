@@ -5,7 +5,7 @@ from compiler.dUMLeParser import dUMLeParser
 class Object(ABC):
     @abstractmethod
     def __init__(self, ctx: dUMLeParser):
-        pass
+        self.name = ""
 
     @abstractmethod
     def generate(self):
@@ -14,6 +14,7 @@ class Object(ABC):
 
 class Note(Object):
     def __init__(self, ctx: dUMLeParser.NoteContext):
+        self.name = ctx.NAME()[0]
         self.noteCode = "note left\n"
         for line in ctx.TEXT():
             self.noteCode += ("  " + line.getText()[1:-1] + "\n")
@@ -26,6 +27,7 @@ class Note(Object):
 class Theme(Object):
     def __init__(self, ctx: dUMLeParser.ThemeContext):
         self.values = []
+        self.name = str(ctx.NAME()[0])
 
         for i in range(len(ctx.PARAM_TYPE())):
             self.values.append((ctx.PARAM_TYPE()[i].getText(),ctx.TEXT()[i].getText().replace('"', '')))
@@ -70,14 +72,12 @@ class Connection(Object):
 class UseCase(Object):
     def __init__(self, ctx: dUMLeParser.Use_caseContext):
         self.content = []
-        self.useCaseName = ""
         self.themeName = ""
 
-        if len(ctx.NAME()) == 2:
-            self.themeName = ctx.name()[0]
-            self.useCaseName = ctx.NAME()[1]
-        else:
-            self.useCaseName = ctx.NAME()[0]
+        if ctx.name()[0]:
+            self.themeName = str(ctx.name()[0])
+
+        self.name = str(ctx.NAME()[0])
 
         for line in ctx.TEXT():
             self.content.append(line)
@@ -93,20 +93,18 @@ class UseCase(Object):
 class Block(Object):
     def __init__(self, ctx: dUMLeParser.BlockContext):
         self.themeName = ""
-        self.blockName = ""
         self.label = ""
 
-        if len(ctx.NAME()) == 2:
-            self.themeName = str(ctx.NAME()[0])
-            self.blockName = str(ctx.NAME()[1])
-        else:
-            self.blockName = str(ctx.NAME()[0])
+        if ctx.name():
+            self.themeName = str(ctx.name()[0])
+       
+        self.name = str(ctx.NAME()[0])
 
         if ctx.TEXT():
             self.label = str(ctx.TEXT()).replace('"', '')
 
     def generate(self):
-        res = "block :" + str(self.blockName) + ":"
+        res = "block :" + str(self.name) + ":"
         if self.label != "":
             res += ' as ' + self.label
         return res
@@ -115,14 +113,12 @@ class Block(Object):
 class ClassDeclaration(Object):
     def __init__(self, ctx: dUMLeParser.Class_declarationContext):
         self.theme = ""
-        self.name = ""
         self.class_line = ctx.class_declaration_line()
 
-        if len(ctx.NAME()) == 2:
-            self.theme = str(ctx.NAME()[0])
-            self.name = str(ctx.NAME()[1])
-        else:
-            self.name = str(ctx.NAME()[0])
+        if ctx.name():
+            self.theme = str(ctx.name()[0])
+            
+        self.name = str(ctx.NAME()[0])
 
     def generate(self):
         result = "class " + self.name + " {\n"
@@ -139,21 +135,19 @@ class ClassDeclaration(Object):
 class Actor(Object):
     def __init__(self, ctx: dUMLeParser.ActorContext):
         self.themeName = ""
-        self.actorName = ""
+        self.name = ""
         self.label = ""
 
-        if len(ctx.NAME()) == 2:
+        if ctx.name():
             # theme is used in object
-            self.themeName = str(ctx.NAME()[0])
-            self.actorName = str(ctx.NAME()[1])
-        else:
-            self.actorName = str(ctx.NAME()[0])
+            self.themeName = str(ctx.name()[0])
+        self.name = str(ctx.NAME()[0])
 
         if ctx.TEXT():
             self.label = str(ctx.TEXT()).replace('"', '')
 
     def generate(self):
-        res = "actor :" + str(self.actorName) + ":"
+        res = "actor :" + str(self.name) + ":"
         if self.label != "":
             res += ' as ' + self.label
         return res
@@ -161,8 +155,7 @@ class Actor(Object):
 
 class Package(Object):
     def __init__(self, ctx: dUMLeParser.Package_declarationContext):
-
-        self.packageName = ""
+        self.name = str(ctx.NAME()[0])
         self.themeName = ""
         self.names = []
         self.objects = []
