@@ -18,7 +18,7 @@ class OutputGenerator:
 
     def __init__(self):
         self.server = PlantUML(url='http://www.plantuml.com/plantuml/img/')
-        self.global_object = {}
+        self.global_objects = {}
         self.diagram_generators = {}
         self._functions = {}
 

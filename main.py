@@ -7,6 +7,7 @@ from compiler.IndexingdUMLeListener import IndexingdUMLeListener
 from compiler.ContentdUMLeListener import ContentdUMLeListener
 from compiler.ValidatingdUMLeListener import ValidatingdUMLeListener
 from compiler.utils.register import Register
+from compiler.utils.output_generator import OutputGenerator
 from compiler.utils.error_message import ErrorMessage
 
 
@@ -38,16 +39,13 @@ def execute_dumle(input_stream):
         print(error.errors)
         return
 
-    return  # todo: delete this
+    output_generator = OutputGenerator()
 
     # code execution
-    content_listener = ContentdUMLeListener(register)
+    content_listener = ContentdUMLeListener(register, output_generator)
     execution_listener = ExecutiondUMLeListener(register)
     walker.walk(content_listener, tree)
     walker.walk(execution_listener, tree)
-
-    # generating final result
-    generate_output()
 
 
 def main(argv):

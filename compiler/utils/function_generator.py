@@ -1,5 +1,5 @@
 from compiler.utils.register import FunctionDescriptor
-from compiler.utils.object import Object
+from compiler.utils.object import Object, Connection, Note
 from copy import deepcopy
 from typing import List
 from compiler.dUMLeParser import dUMLeParser
@@ -13,7 +13,7 @@ class FunctionGenerator:
         self.modifiable_args = []
         self.modifiable_arg_names = []
         self.return_object_names = []
-        self.code_ctx_executed_in_call = {"activation": [], "connection": []}
+        self.code_executed_in_call = {"activation": [], "connection": [], "note": []}
 
     def _process(self, args: List[Object]) -> None:
         for i, arg in enumerate(args):
@@ -21,13 +21,15 @@ class FunctionGenerator:
             arg_copy.name = self.modifiable_arg_names[i]
             self.modifiable_args.append(arg_copy)
 
-    def _exectute_connection_ctx(self, ctx : dUMLeParser.ConnectionContext):
-        # todo: write connection
-        pass
-
-    def _exectute_activation_ctx(self, ctx : dUMLeParser.Block_operationContext):
+    def _execute_activation_ctx(self, ctx: dUMLeParser.Block_operationContext):
         # todo: write activation
         pass
+
+    def add_connection(self, connection: Connection) -> None:
+        self.code_executed_in_call["connection"].append(connection)
+
+    def add_note(self, note: Note) -> None:
+        self.code_executed_in_call["note"].append(note)
 
     def call(self, args) -> List[Object]:
         self._process(args)
@@ -41,12 +43,12 @@ class FunctionGenerator:
                 if modifiable_arg.name == result_object_name:
                     result.append(modifiable_arg)
 
-        for operation, ctx_list in self.code_ctx_executed_in_call:
-            if operation == "activation":
-                for ctx in ctx_list:
-                    self._exectute_activation_ctx(ctx)
-            elif operation == "connection":
-                for ctx in ctx_list:
-                    self._exectute_connection_ctx(ctx)
+        # for operation, objects in self.code_executed_in_call:
+        #     if operation == "activation":
+        #         for ctx in objects:
+        #             self._execute_activation_ctx(ctx)
+        #     elif operation == "connection":
+        #         for connection in objects:
+        #             connection.source_object_name
 
         return result

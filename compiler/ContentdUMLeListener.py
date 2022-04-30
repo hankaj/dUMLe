@@ -1,36 +1,49 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.register import Register, Scope
-from compiler.utils.object import Theme, Actor, UseCase, ClassDeclaration, Connection, Block, Note, Package
+from compiler.utils.register import Register, Scope, FunctionDescriptor
+from compiler.utils.object import Object, Theme, Actor, UseCase, Class, Connection, Block, Note, Package
+from compiler.utils.function_generator import FunctionGenerator
+from compiler.utils.output_generator import OutputGenerator
+from compiler.utils.diagram_generator import DiagGenerator
 
 
 class ContentdUMLeListener(dUMLeListener):
-    def __init__(self, register: Register):
+    def __init__(self, register: Register, output_generator: OutputGenerator):
         self.register = register
+        self.output_generator = output_generator
+
         self.current_scope_name = register.global_scope.name
+        self.is_in_diagram = False
         self.is_in_function = False
         self.current_function_name = ""
+        self.current_diagram_name = ""
+
+    def _enter_diag(self, ctx):
+        self.is_in_diagram = True
+        self.current_diagram_name = ctx.NAME().getText()
+        self.current_scope_name = self.current_diagram_name
+
+    def _exit_diag(self):
+        self.current_diagram_name = ""
+        self.is_in_diagram = False
+        self.exit_scope()
 
     def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
 
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
-        # po co to jest? ten wyjątek już chyba wcześniej wywali
-        if self.is_in_function:
-            raise Exception("Functions cannot be nested")
-
         self.is_in_function = True
         self.current_function_name = ctx.NAME().getText()
         self.current_scope_name = self.current_function_name
 
     def enterClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
+        self._enter_diag(ctx)
 
     def enterUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
+        self._enter_diag(ctx)
 
     def enterSeq_diagram(self, ctx: dUMLeParser.Seq_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
+        self._enter_diag(ctx)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         self.is_in_function = False
@@ -38,82 +51,61 @@ class ContentdUMLeListener(dUMLeListener):
         self.exit_scope()
 
     def exitClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
-        self.exit_scope()
+        self._exit_diag()
 
     def exitUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
-        self.exit_scope()
+        self._exit_diag()
 
     def exitSeq_diagram(self, ctx: dUMLeParser.Seq_diagramContext):
-        self.exit_scope()
+        self._exit_diag()
 
     def enterActor(self, ctx: dUMLeParser.ActorContext):
-        if self.is_in_function:
-            actor = Actor(ctx)
-            self.register.update_function_in_scope(self.current_function_name, actor.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+        actor = Actor(ctx)
+        self._add_object(actor)
 
     def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
-        if self.is_in_function:
-            use_case = UseCase(ctx)
-            self.register.update_function_in_scope(self.current_function_name, use_case.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+        use_case = UseCase(ctx)
+        self._add_object(use_case)
 
     def enterBlock(self, ctx: dUMLeParser.BlockContext):
-        if self.is_in_function:
-            block = Block(ctx)
-            self.register.update_function_in_scope(self.current_function_name, block.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+        block = Block(ctx)
+        self._add_object(block)
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
+        note = Note(ctx)
+        # todo: support theme
+
         if self.is_in_function:
-            note = Note(ctx)
-            self.register.update_function_in_scope(self.current_function_name, note.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+            self.output_generator.get_function(self.register.parent_name(self.current_function_name),
+                                               self.current_function_name).add_note(note)
+        elif self.is_in_diagram:
+            for object in self.output_generator.diagram_generators[self.current_diagram_name]:
+                if object.name == note.object_name:
+                    object.add_note(note)
+                    break
+        else:  # global
+            self.output_generator.global_objects[note.object_name].add_note(note)
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
-        for name in ctx.NAME():
-            if not self.register.is_object_in_scope(name.getText(), self.current_scope_name):
-                raise Exception("Object \"" + name.getText() + "\" is not declared in scope \"" + self.current_scope_name + "\"")
-
+        connection = Connection(ctx)
         if self.is_in_function:
-            connection = Connection(ctx)
-            self.register.update_function_in_scope(self.current_function_name, connection.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+            self.output_generator.get_function(self.register.parent_name(self.current_function_name),
+                                               self.current_function_name).add_connection(connection)
+        elif self.is_in_diagram:
+            for object in self.output_generator.diagram_generators[self.current_diagram_name]:
+                if object.name == connection.source_object_name:
+                    object.add_connection(connection)
+                    break
+        else:  # global
+            self.output_generator.global_objects[connection.source_object_name].add_note(connection)
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
         raise Exception("Theme is not yet supported")
-        # if self.is_in_function:
-        #     theme = Theme(self, ctx)
-        #     theme.process()
-        #     self.register.scopes[self.current_scope_name].function_register[
-        #         self.current_function_name] += theme.generate()
-        # else:
-        #     # todo: add generator for multiple output
-        #     pass
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        if self.is_in_function:  # todo: check if proper scope for package objects
-            package = Package(ctx)
-            self.register.update_function_in_scope(self.current_function_name, package.generate(),
-                                                   self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+        package = Package(ctx)
+        # todo: implement
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
-        if self.is_in_function:
-            class_declaration = ClassDeclaration(ctx)
-            self.register.update_function_in_scope(self.current_function_name, class_declaration.generate(), self.current_scope_name)
-        else:
-            # todo: add generator for multiple output
-            pass
+        class_object = Class(ctx)
+        self._add_object(class_object)
