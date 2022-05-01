@@ -18,7 +18,6 @@ class Note:
 
 
 class Object(ABC):
-    @abstractmethod
     def __init__(self):
         self.name = ""
         self.note = None
@@ -46,6 +45,7 @@ class Object(ABC):
 
 class Theme(Object):
     def __init__(self, ctx: dUMLeParser.ThemeContext):
+        super().__init__()
         self.values = []
         self.name = str(ctx.NAME()[0])
 
@@ -61,6 +61,7 @@ class Theme(Object):
 
 class UseCase(Object):
     def __init__(self, ctx: dUMLeParser.Use_caseContext):
+        super().__init__()
         self.content = []
         self.themeName = ""
 
@@ -82,6 +83,7 @@ class UseCase(Object):
 
 class Block(Object):
     def __init__(self, ctx: dUMLeParser.BlockContext):
+        super().__init__()
         self.themeName = ""
         self.label = ""
 
@@ -105,13 +107,14 @@ class Connection:
     source_object_name: str
     destination_object_name: str
     arrow: str
-    label: str
+    label: str = ""
 
     def __init__(self, ctx: dUMLeParser.ConnectionContext):
         self.source_object_name = ctx.name(0).getText()
         self.destination_object_name = ctx.name(1).getText()
         connection_type = ctx.CONNECTION_TYPE().getText()
-        self.label = ctx.TEXT()[1:-1]
+        if ctx.TEXT():
+            self.label = ctx.TEXT()[1:-1]
         if ctx.ARROW():
             self.arrow = str(ctx.ARROW())
         else:
@@ -133,12 +136,13 @@ class Connection:
 
 class Class(Object):
     def __init__(self, ctx: dUMLeParser.Class_declarationContext):
+        super().__init__()
         self.theme = ""
         self.class_lines = ctx.class_declaration_line()
         self.connections = {}
         if ctx.name():
-            self.theme = str(ctx.name()[0])
-        self.name = str(ctx.NAME()[0])
+            self.theme = str(ctx.name())
+        self.name = str(ctx.NAME())
 
     def _generate(self) -> str:
         result = "class " + self.name + " {\n"
@@ -169,6 +173,7 @@ class Class(Object):
 
 class Actor(Object):
     def __init__(self, ctx: dUMLeParser.ActorContext):
+        super().__init__()
         self.themeName = ""
         self.name = ""
         self.label = ""
@@ -190,6 +195,7 @@ class Actor(Object):
 
 class Package(Object):
     def __init__(self, ctx: dUMLeParser.Package_declarationContext):
+        super().__init__()
         self.name = str(ctx.NAME()[0])
         self.themeName = ""
         self.names = []

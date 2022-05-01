@@ -22,11 +22,24 @@ class ContentdUMLeListener(dUMLeListener):
         self.is_in_diagram = True
         self.current_diagram_name = ctx.NAME().getText()
         self.current_scope_name = self.current_diagram_name
+        self.output_generator.diagram_generators[self.current_diagram_name] = DiagGenerator()
 
     def _exit_diag(self):
         self.current_diagram_name = ""
         self.is_in_diagram = False
         self.exit_scope()
+
+    def _add_object(self, object: Object):
+        if self.is_in_function:
+            self.output_generator.get_function(self.register.parent_name(self.current_function_name),
+                                               self.current_function_name).fixed_objects.append(object)
+        elif self.is_in_diagram:
+            if self.current_diagram_name not in self.output_generator.diagram_generators:
+                self.output_generator.diagram_generators[self.current_diagram_name].objects = [object]
+            else:
+                self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
+        else:  # global
+            self.output_generator.global_objects[object.name] = object
 
     def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
@@ -34,6 +47,16 @@ class ContentdUMLeListener(dUMLeListener):
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         self.is_in_function = True
         self.current_function_name = ctx.NAME().getText()
+        descriptor = self.register.get_function_descriptor_in_scope(self.current_function_name, self.current_scope_name)
+        function_generator = FunctionGenerator(descriptor)
+
+        if ctx.arg_list(1):
+            function_generator.modifiable_arg_names = [name.getText() for name in ctx.arg_list(0).NAME()]
+            function_generator.return_object_names = [name.getText() for name in ctx.arg_list(1).NAME()]
+        else:
+            function_generator.return_object_names = [name.getText() for name in ctx.arg_list(0).NAME()]
+            
+        self.output_generator.add_function(self.current_scope_name, self.current_function_name, function_generator)
         self.current_scope_name = self.current_function_name
 
     def enterClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):

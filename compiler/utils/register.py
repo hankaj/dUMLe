@@ -70,3 +70,11 @@ class Register:
 
     def parent_name(self, scope_name: str) -> str:
         return self.scopes[scope_name].parent
+
+    def get_nearest_scope_name(self, current_scope_name: str, fun_name: str) -> str:
+        if current_scope_name is None:
+            raise Exception(f"Cannot find scope of function {fun_name}")
+        if fun_name not in self.scopes[current_scope_name].function_register:
+            return self.get_nearest_scope_name(self.parent_name(current_scope_name), fun_name)
+        return current_scope_name
+

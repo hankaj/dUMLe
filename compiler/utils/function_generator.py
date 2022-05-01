@@ -1,6 +1,6 @@
 from compiler.utils.register import FunctionDescriptor
 from compiler.utils.object import Object, Connection, Note
-from copy import deepcopy
+from copy import deepcopy, copy
 from typing import List
 from compiler.dUMLeParser import dUMLeParser
 
@@ -17,7 +17,7 @@ class FunctionGenerator:
 
     def _process(self, args: List[Object]) -> None:
         for i, arg in enumerate(args):
-            arg_copy = deepcopy(arg)
+            arg_copy = copy(arg)
             arg_copy.name = self.modifiable_arg_names[i]
             self.modifiable_args.append(arg_copy)
 
@@ -38,10 +38,12 @@ class FunctionGenerator:
         for result_object_name in self.return_object_names:
             for fixed_object in self.fixed_objects:
                 if fixed_object.name == result_object_name:
-                    result.append(fixed_object)
+                    result.append(copy(fixed_object))
             for modifiable_arg in self.modifiable_args:
                 if modifiable_arg.name == result_object_name:
-                    result.append(modifiable_arg)
+                    result.append(copy(modifiable_arg))
+
+        self.modifiable_args.clear()
 
         # for operation, objects in self.code_executed_in_call:
         #     if operation == "activation":

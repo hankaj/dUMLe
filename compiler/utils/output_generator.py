@@ -1,7 +1,9 @@
 from enum import Enum, auto
-from typing import List
+from typing import List, Tuple
 from plantuml import PlantUML
 from compiler.utils.function_generator import FunctionGenerator
+from compiler.utils.object import Object
+from compiler.utils.register import Register
 import os
 
 
@@ -22,7 +24,7 @@ class OutputGenerator:
         self.diagram_generators = {}
         self._functions = {}
 
-    def generate(self, diag_name: str, mode: Mode, object_list: List, output_filename: str = None) -> None:
+    def generate(self, diag_name: str, mode: Mode = None, object_list: List = None, output_filename: str = None) -> None:
         diagram_generator = self.diagram_generators[diag_name]
         output = "@startuml\n"
         output += diagram_generator.generate(mode, object_list)
@@ -32,10 +34,31 @@ class OutputGenerator:
         if output_filename is None:
             output_filename = diag_name + "_".join(obj_name for obj_name in object_list)
         self.server.processes_file(filename="results/output.txt", outfile=output_filename)
-        os.remove("results/output.txt")
+        # os.remove("results/output.txt")  # todo: uncomment
 
     def add_function(self, scope_name: str, function_name: str, function_generator: FunctionGenerator) -> None:
-        self._functions[scope_name + ":" + function_name] = function_generator
+        self._functions[scope_name + "&" + function_name] = function_generator
 
     def get_function(self, scope_name: str, function_name: str) -> FunctionGenerator:
-        return self._functions[scope_name + ":" + function_name]
+        return self._functions[scope_name + "&" + function_name]
+
+    def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
+        if "&" in name:
+            return name.split("&")[0], name.split("&")[1]
+        return None, name
+
+    def get_object(self, name: str, current_scope_name: str) -> Object:
+        scope_name, object_name = self._get_scope_if_exists(name)
+        if scope_name is None:
+            scope_name = current_scope_name
+
+        if scope_name is None:  # todo: delete this in final version
+            raise Exception("Scope name is none. Object generator function: get_object()")
+
+        if scope_name == "global":
+            return self.global_objects[object_name]
+        else:
+            return self.diagram_generators[scope_name].get_object(object_name)
+
+    def get_objects(self, names: List[str], current_scope_name: str) -> List[Object]:
+        return [self.get_object(object_name, current_scope_name) for object_name in names]

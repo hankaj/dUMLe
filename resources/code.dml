@@ -1,23 +1,40 @@
-diagclass CLASS:
-    name fun1()
-    class M5:
-        protected "int size1"
+def fun(arg):
+    class G:
+        private "asedasd()"
+    return arg, G
 
-    class M6:
-        protected "int size2"
+class A:
+    private "void print()"
 
-    M6 aggregate M5
+diagclass CLASS10:
+    A, B = fun1()
+    C1, D1 = fun1()
+    C2, D2 = fun1()
+    C3, D3 = fun1()
+    C4, D4 = fun1()
+    C5, D5 = fun1()
+    C6, D6 = fun1()
+    C7, D7 = fun2()
+    C8, D8 = fun1()
+    C9, D9 = fun1()
+    C10, D10 = fun1()
+    DUPA, DUPADUPAAAA = fun(A)
+    DUPA1, DUPADUPAAAA2 = fun(C7)
+    DUPA3, DUPADUPAAAA3 = fun(global&A)
 
-    exec CLASS
+diagclass CLASS11:
+    A, B = fun1()
+    DUPA, DUPADUPAAAA = fun(A)
+    DUPA1, DUPADUPAAAA2 = fun(B)
+    DUPA3, DUPADUPAAAA3 = fun(global&A)
 
 def fun1():
-    klasa fun1()
     class M1B:
-        private "void print()"
+        private "void print12454231236346()"
     class M2:
         public "void helloWorld()"
-    M1B implement klasa[0]
-    return [object]
+    M1B implement M2
+    return M1B, M2
 
 def fun2():
     class M3:
@@ -25,4 +42,4 @@ def fun2():
     class M4:
         public "void helloWorld()"
     M3 implement M4
-    return []
+    return M4, M3
