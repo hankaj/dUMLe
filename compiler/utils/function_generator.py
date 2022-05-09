@@ -13,23 +13,19 @@ class FunctionGenerator:
         self.modifiable_args = []
         self.modifiable_arg_names = []
         self.return_object_names = []
-        self.code_executed_in_call = {"activation": [], "connection": [], "note": []}
+
+        self.connections_to_create = []
+        self.activations_to_create = []
+        self.notes_to_create = []
 
     def _process(self, args: List[Object]) -> None:
         for i, arg in enumerate(args):
             arg_copy = copy(arg)
             arg_copy.name = self.modifiable_arg_names[i]
+
+
+
             self.modifiable_args.append(arg_copy)
-
-    def _execute_activation_ctx(self, ctx: dUMLeParser.Block_operationContext):
-        # todo: write activation
-        pass
-
-    def add_connection(self, connection: Connection) -> None:
-        self.code_executed_in_call["connection"].append(connection)
-
-    def add_note(self, note: Note) -> None:
-        self.code_executed_in_call["note"].append(note)
 
     def call(self, args) -> List[Object]:
         self._process(args)
@@ -43,14 +39,20 @@ class FunctionGenerator:
                 if modifiable_arg.name == result_object_name:
                     result.append(copy(modifiable_arg))
 
+        for connection in self.connections_to_create:
+            for object in result:
+                if object.name == connection.source_object_name:
+                    object.add_connection(connection)
+
+        for note in self.notes_to_create:
+            for object in result:
+                if object.name == note.object_name:
+                    object.add_note(note)
+
+        # todo: support activations
+
+
         self.modifiable_args.clear()
 
-        # for operation, objects in self.code_executed_in_call:
-        #     if operation == "activation":
-        #         for ctx in objects:
-        #             self._execute_activation_ctx(ctx)
-        #     elif operation == "connection":
-        #         for connection in objects:
-        #             connection.source_object_name
 
         return result

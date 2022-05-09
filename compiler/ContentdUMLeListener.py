@@ -100,7 +100,7 @@ class ContentdUMLeListener(dUMLeListener):
 
         if self.is_in_function:
             self.output_generator.get_function(self.register.parent_name(self.current_function_name),
-                                               self.current_function_name).add_note(note)
+                                               self.current_function_name).notes_to_create.append(note)
         elif self.is_in_diagram:
             for object in self.output_generator.diagram_generators[self.current_diagram_name]:
                 if object.name == note.object_name:
@@ -110,17 +110,10 @@ class ContentdUMLeListener(dUMLeListener):
             self.output_generator.global_objects[note.object_name].add_note(note)
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
-        connection = Connection(ctx)
         if self.is_in_function:
+            connection = Connection(ctx)
             self.output_generator.get_function(self.register.parent_name(self.current_function_name),
-                                               self.current_function_name).add_connection(connection)
-        elif self.is_in_diagram:
-            for object in self.output_generator.diagram_generators[self.current_diagram_name]:
-                if object.name == connection.source_object_name:
-                    object.add_connection(connection)
-                    break
-        else:  # global
-            self.output_generator.global_objects[connection.source_object_name].add_note(connection)
+                                               self.current_function_name).connections_to_create.append(connection)
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
         raise Exception("Theme is not yet supported")

@@ -3,7 +3,7 @@ from compiler.dUMLeParser import dUMLeParser
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 from typing import List, Tuple
-from compiler.utils.object import Object
+from compiler.utils.object import Object, Connection
 
 
 class FunctionCalldUMLeListener(dUMLeListener):
@@ -64,14 +64,38 @@ class FunctionCalldUMLeListener(dUMLeListener):
         self._exit_diag()
 
     def _change_names(self, objects: List[Object], names: List[str]) -> List[Object]:
-        for object, name in zip(objects, names):
-            object.name = name
+        new_names = {object.name: new_name for object, new_name in zip(objects, names)}
+        print(new_names)
+        for object in objects:
+            new_connections = {}
+            for destination_object_name, connections in object.connections.items():
+                for connection in connections:
+                    connection.source_object_name = new_names[connection.source_object_name]
+                    connection.destination_object_name = new_names[connection.destination_object_name]
+                    if connection.destination_object_name not in new_connections:
+                        new_connections[connection.destination_object_name] = [connection]
+                    else:
+                        new_connections[connection.destination_object_name].append(connection)
+            object.name = new_names[object.name]
+
         return objects
 
     def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
         if "&" in name:
             return name.split("&")[0], name.split("&")[1]
         return None, name
+
+    def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
+        if self.is_in_function:
+            return
+        connection = Connection(ctx)
+        if self.is_in_diagram:
+            for object in self.output_generator.diagram_generators[self.current_diagram_name].objects:
+                if object.name == connection.source_object_name:
+                    object.add_connection(connection)
+                    break
+        else: # global
+            self.output_generator.global_objects[connection.source_object_name].add_connection(connection)
 
     def enterNamed_list_declaration(self, ctx: dUMLeParser.Named_list_declarationContext):
         if ctx.fun_call():
