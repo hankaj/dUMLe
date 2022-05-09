@@ -8,8 +8,14 @@ class A:
     private "void print()"
 
 diagclass CLASS:
+    exec "class3.png"
     class C:
         protected "C()"
+
+    class A:
+        private "AsdasD()"
+
+    MALIK_MONTANA, GLOBAL_CLASS = fun(A)
 
     class D:
         protected "D()"
@@ -23,7 +29,9 @@ diagclass CLASS:
     class H:
         public "asdH()"
 
-    G, H = fun10(C, D)
+    G1, H1 = fun10(C, D)
+    G2, H2 = fun10(C, D)
+    G3, H3 = fun10(C, D)
 
     A, B = fun1()
 

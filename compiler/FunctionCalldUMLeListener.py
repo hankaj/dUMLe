@@ -63,7 +63,7 @@ class FunctionCalldUMLeListener(dUMLeListener):
     def exitUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
         self._exit_diag()
 
-    def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
+    def _get_scope_if_exists(self, name: str) -> Tuple['str|None', str]:
         if "&" in name:
             return name.split("&")[0], name.split("&")[1]
         return None, name
@@ -96,12 +96,27 @@ class FunctionCalldUMLeListener(dUMLeListener):
 
             for object in returned_objects:
                 if self.is_in_function:
-                    self.output_generator.get_function(self.register.get_nearest_scope_name(self.current_scope_name, self.current_function_name),
-                                                        self.current_function_name).fixed_objects.append(object)
+                    objects = self.output_generator.get_function(self.register.get_nearest_scope_name(self.current_scope_name, self.current_function_name),
+                                                        self.current_function_name).fixed_objects
+                    for existing_object in objects:
+                        if existing_object.name == object.name:
+                            objects.remove(existing_object)
+                            break
+                    objects.append(object)
                 elif self.is_in_diagram:
-                    self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
+                    objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
+                    for existing_object in objects:
+                        if existing_object.name == object.name:
+                            objects.remove(existing_object)
+                            break
+                    objects.append(object)
                 else:  # global
-                    self.output_generator.global_objects.append(object)
+                    objects = self.output_generator.global_objects
+                    for existing_object in objects:
+                        if existing_object.name == object.name:
+                            objects.remove(existing_object)
+                            break
+                    objects.append(object)
         else:  # list declaration
             raise Exception("List declaration not supported")
             pass

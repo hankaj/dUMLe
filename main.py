@@ -13,12 +13,6 @@ from compiler.utils.output_generator import OutputGenerator
 from compiler.utils.error_message import ErrorMessage
 
 
-# def generate_output():
-#     outfile = "results/result.png"
-#     server = PlantUML(url='http://www.plantuml.com/plantuml/img/')
-#     server.processes_file(filename="results/output.txt", outfile=outfile)
-
-
 def execute_dumle(input_stream):
     # creating objects
     try:
@@ -47,22 +41,18 @@ def execute_dumle(input_stream):
         # code execution
         content_listener = ContentdUMLeListener(register, output_generator)
         function_call_listener = FunctionCalldUMLeListener(register, output_generator)
-        #execution_listener = ExecutiondUMLeListener(register)  # support this
+        execution_listener = ExecutiondUMLeListener(register, output_generator)
         print("Creating content...")
         walker.walk(content_listener, tree)
         print("Calling functions...")
         walker.walk(function_call_listener, tree)
+        print("Executing diagrams...")
+        walker.walk(execution_listener, tree)
 
-        print("Debug:")
+        print("Debug information:")
         output_generator.debug()
-
-        for diagram_generator in output_generator.diagram_generators:
-            output_generator.generate(diagram_generator, None, None, diagram_generator + ".png")
-
-
-        #walker.walk(execution_listener, tree)  # support this
     except Exception as e:
-        print("Error dasdfasdhere: " + str(e))
+        print("Error message: " + str(e))
         traceback.print_exc()
 
 def main(argv):

@@ -2,106 +2,91 @@ from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
 from compiler.utils.object import Theme, Actor, UseCase, Connection, Block, Note, Package
 from compiler.utils.register import Register
+from compiler.utils.output_generator import OutputGenerator
 
 
 class ExecutiondUMLeListener(dUMLeListener):
-    def __init__(self, register: Register):
-        self.is_in_function = False
-        self.themes = {}
-        self.output = ""
+    def __init__(self, register: Register, output_generator: OutputGenerator):
+        self.output_generator = output_generator
         self.register = register
         self.current_scope_name = self.register.global_scope.name
-
-    def update_output(self, string_to_add):
-        self.output += string_to_add
-
-    def enterProgram(self, ctx: dUMLeParser.ProgramContext):
-        self.update_output("@startuml\n")
-
-    def exitProgram(self, ctx: dUMLeParser.ProgramContext):
-        self.update_output("@enduml")
-        with open("results/output.txt", 'w+') as fp:
-            fp.write(self.output.rstrip())
+        self.is_in_diagram = False
+        self.is_in_function = False
+        self.current_diagram_name = ""
 
     def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
 
-    # global
+    def enter_scope(self, ctx):
+        self.current_scope_name = ctx.NAME().getText()
 
-    def enterTheme(self, ctx: dUMLeParser.ThemeContext):
-        theme = Theme(ctx)
-        theme_code = theme.generate()
-        self.themes[str(ctx.NAME())] = theme_code
-        # tak powinno być?
-        self.update_output(theme_code)
-
-    # function
-
-    def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
-        if self.is_in_function:
-            raise Exception("Functions cannot be nested")
-
+    def enterFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
         self.is_in_function = True
+        self.enter_scope(ctx)
+
+    def _enter_diag(self, ctx):
+        self.is_in_diagram = True
+        self.current_diagram_name = ctx.NAME().getText()
+        self.enter_scope(ctx)
+
+    def _exit_diag(self):
+        self.current_diagram_name = ""
+        self.is_in_diagram = False
+        self.exit_scope()
+
+    def enterSeq_diagram(self, ctx:dUMLeParser.Seq_diagramContext):
+        self._enter_diag(ctx)
+
+    def enterUse_case_diagram(self, ctx:dUMLeParser.Use_case_diagramContext):
+        self._enter_diag(ctx)
+
+    def enterClass_diagram(self, ctx:dUMLeParser.Class_diagramContext):
+        self._enter_diag(ctx)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         self.is_in_function = False
+        self.exit_scope()
 
-    def enterFun_call(self, ctx: dUMLeParser.Fun_callContext):
-        fun_name = ctx.name().getText()
-        if not self.register.is_function_in_scope(fun_name, self.current_scope_name):
-            raise Exception(
-                "Function \"" + fun_name + "\" is not declared in scope \"" + self.current_scope_name + "\"")
-        #self.update_output(self.register.get_function_body_in_scope(fun_name, self.current_scope_name))
-
-    # diagram
-
-    def enterClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
-
-    def enterUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
-
-    def enterSeq_diagram(self, ctx: dUMLeParser.Seq_diagramContext):
-        self.current_scope_name = ctx.NAME().getText()
+    def exitSeq_diagram(self, ctx:dUMLeParser.Seq_diagramContext):
+        self._exit_diag()
 
     def exitClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
-        self.exit_scope()
+        self._exit_diag()
 
     def exitUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
-        self.exit_scope()
+        self._exit_diag()
 
-    def exitSeq_diagram(self, ctx: dUMLeParser.Seq_diagramContext):
-        self.exit_scope()
+    def enterExecution(self, ctx:dUMLeParser.ExecutionContext):
+        if self.is_in_function:
+            raise Exception("Cannot execute diagiam inside the function")
 
-    # object delaration functions
+        if not self.is_in_diagram and not ctx.NAME(0):
+            raise Exception("Diagram name is required in global exectution. Please provide the name of the diagram that you want to execute")
 
-    def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
-        if not self.is_in_function:
-            class_declaration = ClassDeclaration(ctx)
-            self.update_output(class_declaration.generate())
+        diag_name = self.current_diagram_name
+        file_name = self.current_diagram_name + ".png"
+        mode = None
+        object_list = None
 
-    def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
-        if not self.is_in_function:
-            for name in ctx.name():
-                if not self.register.is_object_in_scope(name.getText(), self.current_scope_name):
-                    raise Exception(
-                        "Object \"" + name.getText() + "\" is not declared in scope \"" + self.current_scope_name + "\"")
-            connection = Connection(ctx)
-            self.update_output(connection.generate() + '\n')
+        if ctx.NAME(0):
+            diag_name = ctx.NAME(0).getText()
 
-    def exitNote(self, ctx: dUMLeParser.NoteContext):
-        self.update_output("note left\n")
-        for line in ctx.TEXT():
-            self.update_output("  " + line.getText()[1:-1] + "\n")
-        self.update_output("end note\n")
-        pass
+        if ctx.TEXT():
+            file_name = ctx.TEXT().getText()[1:-1]
+            if file_name[-4:] != ".png":
+                raise Exception("The only supported extension is png. Please provide the png file")
 
-    def enterActor(self, ctx: dUMLeParser.ActorContext):
-        actor = Actor(ctx)
-        actor_code = actor.generate()
-        self.update_output(actor_code + '\n')
+        if ctx.MODE():
+            mode = ctx.MODE().getText()
 
-    def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
-        use_case = UseCase(ctx)
-        use_case = use_case.generate()
-        self.update_output(use_case + '\n')
+        if ctx.list_declaration():
+            object_list = [name.getText() for name in ctx.list_declaration().name()]
+        elif ctx.list_access():
+            raise Exception("List access is not supported")
+        elif ctx.NAME(1):
+            raise Exception("List name is not supported")
+        elif ctx.obj_access():
+            raise Exception("Object access is not supported")
+
+        for diagram_generator in self.output_generator.diagram_generators:
+            self.output_generator.generate(diagram_generator, mode, object_list, file_name)

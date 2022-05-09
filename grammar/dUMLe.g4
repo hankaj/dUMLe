@@ -58,7 +58,7 @@ fun_call
     : name '(' BR* arg_list_include_scope BR* ')' BR*;
 
 execution
-    : 'exec' BR+ NAME (BR+ ('brief' | 'all'))? (BR+ (list_declaration | list_access | NAME | obj_access))? (BR+ TEXT)? BR* NL;
+    : 'exec' (BR+ NAME)? (BR+ MODE)? (BR+ (list_declaration | list_access | NAME | obj_access))? (BR+ TEXT)? BR* NL;
 
 loop
     : 'for' BR+ NAME BR+ 'in' BR+ (name | list_declaration | obj_access | fun_call) BR* ':' BR* NL
@@ -144,6 +144,11 @@ BLOCK_OPERATION_TYPE
 CR
 	: 
 	'\r' -> skip;
+
+
+MODE
+    :
+    'brief' | 'all';
 
 COM_SIGN 		
 	: 

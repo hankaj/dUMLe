@@ -34,7 +34,7 @@ class OutputGenerator:
         if output_filename is None:
             output_filename = diag_name + "_".join(obj_name for obj_name in object_list)
         self.server.processes_file(filename="results/output.txt", outfile=output_filename)
-        # os.remove("results/output.txt")  # todo: uncomment
+        # os.remove("results/output.txt")  # todo: remove
 
     def add_function(self, scope_name: str, function_name: str, function_generator: FunctionGenerator) -> None:
         self._functions[scope_name + "&" + function_name] = function_generator
@@ -42,7 +42,7 @@ class OutputGenerator:
     def get_function(self, scope_name: str, function_name: str) -> FunctionGenerator:
         return self._functions[scope_name + "&" + function_name]
 
-    def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
+    def _get_scope_if_exists(self, name: str):
         if "&" in name:
             return name.split("&")[0], name.split("&")[1]
         return None, name

@@ -43,7 +43,7 @@ class FunctionGenerator:
         for connection in self.connections_to_create:
             for object in result:
                 if object.name == connection.source_object_name:
-                    object.add_connection(connection)
+                    object.add_connection(deepcopy(connection))
 
         for note in self.notes_to_create:
             for object in result:
@@ -53,6 +53,5 @@ class FunctionGenerator:
         # todo: support activations
 
         self.modifiable_args.clear()
-        self.modifiable_arg_names.clear()
 
         return result

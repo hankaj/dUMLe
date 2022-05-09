@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
-from copy import copy
+from copy import copy, deepcopy
 
 from compiler.dUMLeParser import dUMLeParser
 
@@ -108,16 +108,13 @@ class Object(ABC):
 
     @staticmethod
     def change_names(objects_: List['Object'], names: List[str]) -> List['Object']:
-        objects = copy(objects_)
+        objects = deepcopy(objects_)
         new_names = {object.name: new_name for object, new_name in zip(objects, names)}
-
-        print(f"Old objects: {[arg.__str__() for arg in objects]}")
-        print(f"Old names {[object.name for object in objects]}")
-        print(f"Dictionary: {new_names}")
 
         for object in objects:
             new_connections = {}
             for destination_object_name, connections in object.connections.items():
+                connections = deepcopy(connections)
                 for connection in connections:
                     connection.source_object_name = new_names[connection.source_object_name]
                     connection.destination_object_name = new_names[connection.destination_object_name]
@@ -127,10 +124,6 @@ class Object(ABC):
                         new_connections[connection.destination_object_name].append(connection)
             object.name = new_names[object.name]
             object.connections = new_connections
-            print(f"Changed: {new_connections}")
-
-        print()
-
         return objects
 
 
@@ -194,19 +187,21 @@ class Block(Object):
 class Class(Object):
     def __init__(self, ctx: dUMLeParser.Class_declarationContext):
         super().__init__()
-        self.class_lines = ctx.class_declaration_line()
+
+        self.class_body = ""
+        for class_declaration_line in ctx.class_declaration_line():
+            if class_declaration_line.MODIFIER():
+                access_type = {"private": "-", "public": "+", "protected": "#"}
+                self.class_body += (access_type[str(class_declaration_line.MODIFIER())])
+            self.class_body+= str(class_declaration_line.TEXT())[1:-1] + "\n"
+
         if ctx.name():
             self.theme = str(ctx.name())
         self.name = str(ctx.NAME())
 
     def _generate(self) -> str:
         result = "class " + self.name + " {\n"
-        for class_declaration_line in self.class_lines:
-            if class_declaration_line.MODIFIER():
-                access_type = {"private": "-", "public": "+", "protected": "#"}
-                result += (access_type[str(class_declaration_line.MODIFIER())])
-            result += str(class_declaration_line.TEXT())[1:-1] + "\n"
-
+        result += self.class_body
         result += "}\n"
         return result
 
