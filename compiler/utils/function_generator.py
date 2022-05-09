@@ -19,13 +19,14 @@ class FunctionGenerator:
         self.notes_to_create = []
 
     def _process(self, args: List[Object]) -> None:
-        for i, arg in enumerate(args):
-            arg_copy = copy(arg)
-            arg_copy.name = self.modifiable_arg_names[i]
-
-
-
-            self.modifiable_args.append(arg_copy)
+        # todo: delete or reuse
+        # for i, arg in enumerate(args):
+            # arg_copy = copy(arg)
+            # arg_copy.name = self.modifiable_arg_names[i]
+            # self.modifiable_args.append(arg_copy)
+        #self.modifiable_args = [copy(arg) for arg in args]
+        self.modifiable_args = [deepcopy(arg) for arg in args]
+        self.modifiable_args = Object.change_names(args, self.modifiable_arg_names)
 
     def call(self, args) -> List[Object]:
         self._process(args)
@@ -51,8 +52,7 @@ class FunctionGenerator:
 
         # todo: support activations
 
-
         self.modifiable_args.clear()
-
+        self.modifiable_arg_names.clear()
 
         return result

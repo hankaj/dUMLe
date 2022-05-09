@@ -2,7 +2,7 @@ from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
-from typing import List, Tuple
+from typing import Tuple
 from compiler.utils.object import Object, Connection
 
 
@@ -63,23 +63,6 @@ class FunctionCalldUMLeListener(dUMLeListener):
     def exitUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
         self._exit_diag()
 
-    def _change_names(self, objects: List[Object], names: List[str]) -> List[Object]:
-        new_names = {object.name: new_name for object, new_name in zip(objects, names)}
-        print(new_names)
-        for object in objects:
-            new_connections = {}
-            for destination_object_name, connections in object.connections.items():
-                for connection in connections:
-                    connection.source_object_name = new_names[connection.source_object_name]
-                    connection.destination_object_name = new_names[connection.destination_object_name]
-                    if connection.destination_object_name not in new_connections:
-                        new_connections[connection.destination_object_name] = [connection]
-                    else:
-                        new_connections[connection.destination_object_name].append(connection)
-            object.name = new_names[object.name]
-
-        return objects
-
     def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
         if "&" in name:
             return name.split("&")[0], name.split("&")[1]
@@ -109,7 +92,7 @@ class FunctionCalldUMLeListener(dUMLeListener):
             arg_list = self.output_generator.get_objects(arg_names, self.current_scope_name)
 
             returned_objects = self.output_generator.get_function(scope_name, fun_name).call(arg_list)
-            returned_objects = self._change_names(returned_objects, returned_arg_names)
+            returned_objects = Object.change_names(returned_objects, returned_arg_names)
 
             for object in returned_objects:
                 if self.is_in_function:

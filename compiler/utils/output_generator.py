@@ -62,3 +62,24 @@ class OutputGenerator:
 
     def get_objects(self, names: List[str], current_scope_name: str) -> List[Object]:
         return [self.get_object(object_name, current_scope_name) for object_name in names]
+
+    def debug(self):
+        print(f"Global objects({len(self.global_objects)}):")
+        print(f"Objects: {[arg.__str__() for arg in self.global_objects.values()]}")
+
+        print()
+
+        print(f"Diagram generators({len(self.diagram_generators)}): ")
+        for diag_name, diag_gen in self.diagram_generators.items():
+            print(f"Diagram generator name: {diag_name}")
+            print(f"Objects: {[arg.__str__() for arg in diag_gen.objects]}")
+            print()
+
+        print(f"Function generators({len(self._functions)}): ")
+        for fun_name, fun_gen in self._functions.items():
+            print(f"Function generator name: {fun_name} arg count: {fun_gen.n_arguments} return count: {fun_gen.n_returns}")
+            print(f"Fixed objects: {[arg.__str__() for arg in fun_gen.fixed_objects]}")
+            print(f"Modifiable args: {fun_gen.modifiable_args}")
+            print(f"Modifiable arg names: {fun_gen.modifiable_arg_names}")
+            print(f"Return object names: {fun_gen.return_object_names}")
+            print()

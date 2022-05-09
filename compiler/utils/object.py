@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
+from copy import copy
 
 from compiler.dUMLeParser import dUMLeParser
 
@@ -20,6 +21,8 @@ class Connection:
             self.label = ctx.TEXT()[1:-1]
         if ctx.ARROW():
             self.arrow = str(ctx.ARROW())
+            self.arrow = str(ctx.ARROW())
+            self.arrow = str(ctx.ARROW())
         else:
             arrows = {"aggregate": "o--",
                       "inherit": "<|--",
@@ -29,6 +32,9 @@ class Connection:
                       "compose": "*--"}
             self.arrow = arrows[connection_type]
 
+    def __str__(self):
+        return f"{self.source_object_name} {self.arrow} {self.destination_object_name}"
+
     def generate(self) -> str:
         result = self.source_object_name + " " + self.arrow + " " + self.destination_object_name
         if self.label:
@@ -36,7 +42,7 @@ class Connection:
         result += "\n"
         return result
 
-
+# todo: change the Note class to look similar to Connection class
 class Note:
     def __init__(self, ctx: dUMLeParser.NoteContext):
         self.object_name = ctx.NAME().getText()
@@ -56,7 +62,8 @@ class Object(ABC):
         self.theme = None  # todo: implement theme
         self.connections = {}
 
-    # todo: move _change_names funtion here and use it while coping arguments
+    def __str__(self):
+        return f"{self. name} {self.connections}"
 
     @abstractmethod
     def _generate(self) -> str:
@@ -98,6 +105,33 @@ class Object(ABC):
             self.connections[connection.destination_object_name] = [connection]
         else:
             self.connections[connection.destination_object_name].append(connection)
+
+    @staticmethod
+    def change_names(objects_: List['Object'], names: List[str]) -> List['Object']:
+        objects = copy(objects_)
+        new_names = {object.name: new_name for object, new_name in zip(objects, names)}
+
+        print(f"Old objects: {[arg.__str__() for arg in objects]}")
+        print(f"Old names {[object.name for object in objects]}")
+        print(f"Dictionary: {new_names}")
+
+        for object in objects:
+            new_connections = {}
+            for destination_object_name, connections in object.connections.items():
+                for connection in connections:
+                    connection.source_object_name = new_names[connection.source_object_name]
+                    connection.destination_object_name = new_names[connection.destination_object_name]
+                    if connection.destination_object_name not in new_connections:
+                        new_connections[connection.destination_object_name] = [connection]
+                    else:
+                        new_connections[connection.destination_object_name].append(connection)
+            object.name = new_names[object.name]
+            object.connections = new_connections
+            print(f"Changed: {new_connections}")
+
+        print()
+
+        return objects
 
 
 class Theme(Object):

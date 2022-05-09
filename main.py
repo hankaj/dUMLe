@@ -53,6 +53,9 @@ def execute_dumle(input_stream):
         print("Calling functions...")
         walker.walk(function_call_listener, tree)
 
+        print("Debug:")
+        output_generator.debug()
+
         for diagram_generator in output_generator.diagram_generators:
             output_generator.generate(diagram_generator, None, None, diagram_generator + ".png")
 

@@ -17,7 +17,13 @@ diagclass CLASS:
     C inherit D
     D aggregate C
 
-    C, D = fun10(C, D)
+    class G:
+        public "asdG()"
+
+    class H:
+        public "asdH()"
+
+    G, H = fun10(C, D)
 
     A, B = fun1()
 
