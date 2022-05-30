@@ -1,7 +1,7 @@
 from compiler.utils.register import FunctionDescriptor
 from compiler.utils.object import Object, Connection, Note
 from copy import deepcopy, copy
-from typing import List
+from typing import List, Tuple
 from compiler.dUMLeParser import dUMLeParser
 
 
@@ -25,11 +25,10 @@ class FunctionGenerator:
             # arg_copy.name = self.modifiable_arg_names[i]
             # self.modifiable_args.append(arg_copy)
         #self.modifiable_args = [copy(arg) for arg in args]
-        self.modifiable_args = [deepcopy(arg) for arg in args]
         self.modifiable_args = Object.change_names(args, self.modifiable_arg_names)
 
-    def call(self, args) -> List[Object]:
-        self._process(args)
+    def call(self, args: List[Object]) -> List[Object]:
+        self.modifiable_args = Object.change_names(args, self.modifiable_arg_names)
 
         result = []
         for result_object_name in self.return_object_names:

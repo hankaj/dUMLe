@@ -16,12 +16,9 @@ class Connection:
     def __init__(self, ctx: dUMLeParser.ConnectionContext):
         self.source_object_name = ctx.name(0).getText()
         self.destination_object_name = ctx.name(1).getText()
-        connection_type = ctx.CONNECTION_TYPE().getText()
         if ctx.TEXT():
             self.label = ctx.TEXT()[1:-1]
         if ctx.ARROW():
-            self.arrow = str(ctx.ARROW())
-            self.arrow = str(ctx.ARROW())
             self.arrow = str(ctx.ARROW())
         else:
             arrows = {"aggregate": "o--",
@@ -30,7 +27,7 @@ class Connection:
                       "associate": "<--",
                       "depend": "<..",
                       "compose": "*--"}
-            self.arrow = arrows[connection_type]
+            self.arrow = arrows[ctx.CONNECTION_TYPE().getText()]
 
     def __str__(self):
         return f"{self.source_object_name} {self.arrow} {self.destination_object_name}"
@@ -107,17 +104,19 @@ class Object(ABC):
             self.connections[connection.destination_object_name].append(connection)
 
     @staticmethod
-    def change_names(objects_: List['Object'], names: List[str]) -> List['Object']:
-        objects = deepcopy(objects_)
+    def change_names(objects: List['Object'], names: List[str]) -> List['Object']:
+        #objects = deepcopy(objects_)
         new_names = {object.name: new_name for object, new_name in zip(objects, names)}
 
         for object in objects:
             new_connections = {}
             for destination_object_name, connections in object.connections.items():
-                connections = deepcopy(connections)
+                #connections = deepcopy(connections)
                 for connection in connections:
-                    connection.source_object_name = new_names[connection.source_object_name]
-                    connection.destination_object_name = new_names[connection.destination_object_name]
+                    if connection.source_object_name in new_names:
+                        connection.source_object_name = new_names[connection.source_object_name]
+                    if connection.destination_object_name in new_names:
+                        connection.destination_object_name = new_names[connection.destination_object_name]
                     if connection.destination_object_name not in new_connections:
                         new_connections[connection.destination_object_name] = [connection]
                     else:

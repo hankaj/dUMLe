@@ -5,6 +5,7 @@ from compiler.utils.function_generator import FunctionGenerator
 from compiler.utils.object import Object
 from compiler.utils.register import Register
 import os
+from copy import  deepcopy
 
 
 class Mode(Enum):
@@ -60,8 +61,14 @@ class OutputGenerator:
         else:
             return self.diagram_generators[scope_name].get_object(object_name)
 
-    def get_objects(self, names: List[str], current_scope_name: str) -> List[Object]:
-        return [self.get_object(object_name, current_scope_name) for object_name in names]
+    def get_objects(self, names: List[str], is_deep_copy: List[bool], current_scope_name: str) -> List[Object]:
+        result = []
+        for object_name, is_deep_copy in zip(names, is_deep_copy):
+            obj = deepcopy(self.get_object(object_name, current_scope_name))
+            if not is_deep_copy:
+                obj.connections = {}
+            result.append(obj)
+        return result
 
     def debug(self):
         print(f"Global objects({len(self.global_objects)}):")

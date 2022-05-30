@@ -24,7 +24,7 @@ instruction
     : obj_declaration
     | list_declaration
     | list_access
-    | named_list_declaration
+    | assignment
     | fun_declaration
     | execution
     | loop
@@ -46,8 +46,8 @@ list_declaration
 list_access
     : name '[' DIGIT+ ']' BR*;
     
-named_list_declaration
-    : arg_list BR+ '=' BR+ (fun_call | list_declaration) BR* NL;
+assignment
+    : arg_list BR+ '=' BR+ (fun_call | list_declaration | arg_list_include_scope) BR* NL;
 
 fun_declaration
     : 'def' BR+ NAME '(' BR* arg_list* BR* ')' BR* ':' BR* NL
@@ -99,7 +99,7 @@ arg_list
     : NAME BR* (',' BR* NAME)*;
 
 arg_list_include_scope
-    : (name BR* (',' BR* name)*)?;
+    : (arg_name BR* (',' BR* arg_name)*)?;
     
 block
     : 'block' (BR+ name)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
@@ -110,6 +110,9 @@ use_case
 
 name
     : SCOPE_NAME?NAME;
+
+arg_name
+    : DEEP_COPY?name;
 
 CLASS_TYPE
     : 'class'
@@ -153,6 +156,10 @@ MODE
 COM_SIGN 		
 	: 
 	'#' ~[\r\n]* -> skip;
+
+DEEP_COPY
+    :
+    '$';
 	
 DIGIT
     :

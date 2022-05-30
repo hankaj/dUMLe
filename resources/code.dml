@@ -1,6 +1,7 @@
 def fun(arg):
     class G:
         private "asedasd()"
+    arg -> G
 
     return arg, G
 
@@ -8,14 +9,14 @@ class A:
     private "void print()"
 
 diagclass CLASS:
-    exec "class3.png"
+    exec
     class C:
         protected "C()"
 
     class A:
         private "AsdasD()"
 
-    MALIK_MONTANA, GLOBAL_CLASS = fun(A)
+    MALIK_MONTANA, GLOBAL_CLASS = fun(global&A)
 
     class D:
         protected "D()"
@@ -29,15 +30,18 @@ diagclass CLASS:
     class H:
         public "asdH()"
 
-    G1, H1 = fun10(C, D)
+    H5 = fun11(A)
+
+    G1, H1 = fun10($C, $D)
     G2, H2 = fun10(C, D)
     G3, H3 = fun10(C, D)
-
-    A, B = fun1()
 
 def fun10(arg1, arg2):
     arg1 depend arg2
     return arg1, arg2
+
+def fun11(arg1):
+    return arg1
 
 def fun1():
     class M1B:

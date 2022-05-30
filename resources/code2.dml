@@ -1,0 +1,12 @@
+def fun2():
+    class G:
+        private "KLATA_PUDZIANA()"
+    return G
+
+def fun():
+    arg = fun()
+    return arg
+
+diagclass PUDZIAN_KING:
+    PIESC_PUDZIANA = fun()
+    exec

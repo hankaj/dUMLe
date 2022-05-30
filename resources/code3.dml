@@ -1,0 +1,20 @@
+def fun(arg):
+    class G:
+        private "asedasd()"
+
+    return arg, G
+
+class A:
+    private "void print()"
+
+diagclass CLASS:
+    exec
+    class C:
+        protected "C()"
+
+    class D:
+        protected "D()"
+
+    C -> D
+    D -> C
+    C = global&A

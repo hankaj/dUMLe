@@ -89,12 +89,12 @@ class dUMLeListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dUMLeParser#named_list_declaration.
-    def enterNamed_list_declaration(self, ctx:dUMLeParser.Named_list_declarationContext):
+    # Enter a parse tree produced by dUMLeParser#assignment.
+    def enterAssignment(self, ctx:dUMLeParser.AssignmentContext):
         pass
 
-    # Exit a parse tree produced by dUMLeParser#named_list_declaration.
-    def exitNamed_list_declaration(self, ctx:dUMLeParser.Named_list_declarationContext):
+    # Exit a parse tree produced by dUMLeParser#assignment.
+    def exitAssignment(self, ctx:dUMLeParser.AssignmentContext):
         pass
 
 
@@ -257,6 +257,15 @@ class dUMLeListener(ParseTreeListener):
 
     # Exit a parse tree produced by dUMLeParser#name.
     def exitName(self, ctx:dUMLeParser.NameContext):
+        pass
+
+
+    # Enter a parse tree produced by dUMLeParser#arg_name.
+    def enterArg_name(self, ctx:dUMLeParser.Arg_nameContext):
+        pass
+
+    # Exit a parse tree produced by dUMLeParser#arg_name.
+    def exitArg_name(self, ctx:dUMLeParser.Arg_nameContext):
         pass
 
 
