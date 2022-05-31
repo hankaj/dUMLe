@@ -14,7 +14,7 @@ class IndexingdUMLeListener(dUMLeListener):
 
     def register_diagram_creation(self, ctx):
         if self.is_in_function:
-            self.error.errors.append("Cannot create diagram inside the function")
+            self.error.errors.append(f"Cannot create diagram inside the function. Line: {ctx.stop.line}")
             return
 
         diag_name = ctx.NAME().getText()
@@ -29,7 +29,7 @@ class IndexingdUMLeListener(dUMLeListener):
     def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         self.nested_function_counter += 1
         if self.is_in_function:
-            self.error.errors.append("Functions cannot be nested")
+            self.error.errors.append(f"Functions cannot be nested. Line: {ctx.stop.line}")
             return
 
         self.is_in_function = True

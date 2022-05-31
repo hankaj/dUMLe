@@ -82,7 +82,7 @@ class FunctionCalldUMLeListener(dUMLeListener):
 
     def enterAssignment(self, ctx:dUMLeParser.AssignmentContext):
         if ctx.list_declaration():  # list declaration
-            raise Exception("List declaration not supported")
+            raise Exception(f"List declaration not supported. Line: {ctx.stop.line}")
             pass
 
         returned_arg_names = [name.getText() for name in ctx.arg_list().NAME()]

@@ -52,7 +52,9 @@ class ValidatingdUMLeListener(dUMLeListener):
         fun_descriptor = self.register.get_function_descriptor_in_scope(fun_name, self.current_scope_name)
 
         if fun_descriptor.n_arguments != fun_arg_count:
-            self.error.errors.append(f"Incorrect number of attributes was passed to \"{fun_name}\" function. Expected: {fun_descriptor.n_arguments}. Got: { fun_arg_count}.\n")
+            self.error.errors.append(f"Incorrect number of attributes was passed to \"{fun_name}\" function."
+                                     f" Expected: {fun_descriptor.n_arguments}. Got: { fun_arg_count}."
+                                     f" Line: {ctx.stop.line}")
             return
 
     def enterAssignment(self, ctx:dUMLeParser.AssignmentContext):
@@ -61,14 +63,16 @@ class ValidatingdUMLeListener(dUMLeListener):
             fun_name = ctx.fun_call().name().getText()
             fun_descriptor = self.register.get_function_descriptor_in_scope(fun_name, self.current_scope_name)
             if fun_descriptor.n_returns != returns_count:
-                self.error.errors.append(f"Wrong number of returns. Expected: {fun_descriptor.n_returns}. Got: {returns_count}.")
+                self.error.errors.append(f"Wrong number of returns. Expected: {fun_descriptor.n_returns}. "
+                                         f"Got: {returns_count}. Line: {ctx.stop.line}")
                 return
         elif ctx.arg_list_include_scope():
             n_values_to_assign = len(ctx.arg_list_include_scope().arg_name())
             if n_values_to_assign != returns_count:
-                self.error.errors.append(f"Cannot unpack {n_values_to_assign} objects to {returns_count} objects.")
+                self.error.errors.append(f"Cannot unpack {n_values_to_assign} objects to {returns_count} objects. "
+                                         f"Line: {ctx.stop.line}")
                 return
         else:  # list declaration here
             if returns_count > 1:  # incorrect list declaration
-                self.error.errors.append(f"Cannot unpack list to {returns_count} objects.")
+                self.error.errors.append(f"Cannot unpack list to {returns_count} objects. Line: {ctx.stop.line}")
                 return
