@@ -116,7 +116,7 @@ class ContentdUMLeListener(dUMLeListener):
                                                self.current_function_name).connections_to_create.append(connection)
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
-        raise Exception("Theme is not yet supported")
+        raise Exception(f"Theme is not yet supported. Line: {ctx.stop.line}")
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
         package = Package(ctx)

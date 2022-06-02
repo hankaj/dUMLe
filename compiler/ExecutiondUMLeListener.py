@@ -12,13 +12,18 @@ class ExecutiondUMLeListener(dUMLeListener):
         self.current_scope_name = self.register.global_scope.name
         self.is_in_diagram = False
         self.is_in_function = False
+        self.is_in_global_scope = True
         self.current_diagram_name = ""
 
     def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
+        if self.current_scope_name == 'global':
+            self.is_in_global_scope = True
 
     def enter_scope(self, ctx):
         self.current_scope_name = ctx.NAME().getText()
+        if self.current_scope_name != 'global':
+            self.is_in_global_scope = False
 
     def enterFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
         self.is_in_function = True
@@ -58,10 +63,15 @@ class ExecutiondUMLeListener(dUMLeListener):
 
     def enterExecution(self, ctx:dUMLeParser.ExecutionContext):
         if self.is_in_function:
-            raise Exception("Cannot execute diagiam inside the function")
+            raise Exception(f"Cannot execute diagram inside the function. Line: {ctx.stop.line}")
+
+        if not self.is_in_diagram and not self.is_in_global_scope:
+            raise Exception(f"Exec can only be called in global scope or in diagram. Line: {ctx.stop.line}")
 
         if not self.is_in_diagram and not ctx.NAME(0):
-            raise Exception("Diagram name is required in global exectution. Please provide the name of the diagram that you want to execute")
+            raise Exception(f"Diagram name is required in global execution. "
+                            f"Please provide the name of the diagram that you want to execute. "
+                            f" Line: {ctx.stop.line}")
 
         diag_name = self.current_diagram_name
         file_name = self.current_diagram_name + ".png"
@@ -74,7 +84,8 @@ class ExecutiondUMLeListener(dUMLeListener):
         if ctx.TEXT():
             file_name = ctx.TEXT().getText()[1:-1]
             if file_name[-4:] != ".png":
-                raise Exception("The only supported extension is png. Please provide the png file")
+                raise Exception(f"The only supported extension is png. Please provide the png file. "
+                                f"Line: {ctx.stop.line}")
 
         if ctx.MODE():
             mode = ctx.MODE().getText()
@@ -82,11 +93,11 @@ class ExecutiondUMLeListener(dUMLeListener):
         if ctx.list_declaration():
             object_list = [name.getText() for name in ctx.list_declaration().name()]
         elif ctx.list_access():
-            raise Exception("List access is not supported")
+            raise Exception(f"List access is not supported. Line: {ctx.stop.line}")
         elif ctx.NAME(1):
-            raise Exception("List name is not supported")
+            raise Exception(f"List name is not supported. Line: {ctx.stop.line}")
         elif ctx.obj_access():
-            raise Exception("Object access is not supported")
+            raise Exception(f"Object access is not supported. Line: {ctx.stop.line}")
 
         for diagram_generator in self.output_generator.diagram_generators:
             self.output_generator.generate(diagram_generator, mode, object_list, file_name)

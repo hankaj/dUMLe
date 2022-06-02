@@ -21,6 +21,11 @@ def execute_dumle(input_stream):
         stream = CommonTokenStream(lexer)
         parser = dUMLeParser(stream)
         tree = parser.program()
+
+        # syntax error
+        if parser.getNumberOfSyntaxErrors() > 0:
+            exit(-1000)
+
         walker = ParseTreeWalker()
         register = Register()
 
@@ -54,6 +59,7 @@ def execute_dumle(input_stream):
     except Exception as e:
         print("Error message: " + str(e))
         traceback.print_exc()
+
 
 def main(argv):
     if len(argv) < 2 or argv[1][-4:] != ".dml":
