@@ -1,10 +1,18 @@
+usecase global:
+    "taki sobie globalny UC, co się interesujesz?"
+
 def fun(arg):
-    note arg:
-        "notateczka"
+    usecase fun:
+        "fun czyli dobra zabawa"
+    arg -> fun
     return arg
 
-diagclass test:
+diagusecase uc:
+    usecase test:
+        "dumle mle"
+    actor stary
+    globalo = global&global
+    stary -> globalo
+    actor mlody
+    mlody = fun(mlody)
     exec
-    class A:
-        public "A()"
-    C = fun(A)

@@ -4,7 +4,7 @@ from compiler.utils.register import Register, Scope, FunctionDescriptor
 from compiler.utils.object import Object, Theme, Actor, UseCase, Class, Connection, Block, Note, Package
 from compiler.utils.function_generator import FunctionGenerator
 from compiler.utils.output_generator import OutputGenerator
-from compiler.utils.diagram_generator import DiagGenerator
+from compiler.utils.diagram_generator import DiagGenerator, DiagType
 
 
 class ContentdUMLeListener(dUMLeListener):
@@ -15,17 +15,20 @@ class ContentdUMLeListener(dUMLeListener):
         self.current_scope_name = register.global_scope.name
         self.is_in_diagram = False
         self.is_in_function = False
+        self.current_diagram_type = None
         self.current_function_name = ""
         self.current_diagram_name = ""
 
-    def _enter_diag(self, ctx):
+    def _enter_diag(self, ctx, diag_type: DiagType):
         self.is_in_diagram = True
         self.current_diagram_name = ctx.NAME().getText()
         self.current_scope_name = self.current_diagram_name
-        self.output_generator.diagram_generators[self.current_diagram_name] = DiagGenerator()
+        self.current_diagram_type = diag_type
+        self.output_generator.diagram_generators[self.current_diagram_name] = DiagGenerator(diag_type)
 
     def _exit_diag(self):
         self.current_diagram_name = ""
+        self.current_diagram_type = None
         self.is_in_diagram = False
         self.exit_scope()
 
@@ -60,13 +63,13 @@ class ContentdUMLeListener(dUMLeListener):
         self.current_scope_name = self.current_function_name
 
     def enterClass_diagram(self, ctx: dUMLeParser.Class_diagramContext):
-        self._enter_diag(ctx)
+        self._enter_diag(ctx, DiagType.CLASS)
 
     def enterUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
-        self._enter_diag(ctx)
+        self._enter_diag(ctx, DiagType.USE_CASE)
 
     def enterSeq_diagram(self, ctx: dUMLeParser.Seq_diagramContext):
-        self._enter_diag(ctx)
+        self._enter_diag(ctx, DiagType.SEQUENCE)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         self.is_in_function = False
@@ -83,14 +86,20 @@ class ContentdUMLeListener(dUMLeListener):
         self._exit_diag()
 
     def enterActor(self, ctx: dUMLeParser.ActorContext):
+        if self.current_diagram_type is not None and self.current_diagram_type != DiagType.USE_CASE:
+            raise Exception(f"You cannot define actor in {self.current_diagram_type}. Line: {ctx.stop.line}")
         actor = Actor(ctx)
         self._add_object(actor)
 
     def enterUse_case(self, ctx: dUMLeParser.Use_caseContext):
+        if self.current_diagram_type is not None and self.current_diagram_type != DiagType.USE_CASE:
+            raise Exception(f"You cannot define use case in {self.current_diagram_type}. Line: {ctx.stop.line}")
         use_case = UseCase(ctx)
         self._add_object(use_case)
 
     def enterBlock(self, ctx: dUMLeParser.BlockContext):
+        if self.current_diagram_type is not None and self.current_diagram_type != DiagType.SEQUENCE:
+            raise Exception(f"You cannot define block in {self.current_diagram_type}. Line: {ctx.stop.line}")
         block = Block(ctx)
         self._add_object(block)
 
@@ -122,5 +131,7 @@ class ContentdUMLeListener(dUMLeListener):
         # todo: implement
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
+        if self.current_diagram_type is not None and self.current_diagram_type != DiagType.CLASS:
+            raise Exception(f"You cannot define class in {self.current_diagram_type}. Line: {ctx.stop.line}")
         class_object = Class(ctx)
         self._add_object(class_object)

@@ -1,8 +1,8 @@
 def fun(arg):
     class G:
         private "asedasd()"
-
-    return arg, G
+    arg -> G
+    return arg
 
 class A:
     private "void print()"
@@ -17,4 +17,4 @@ diagclass CLASS:
 
     C -> D
     D -> C
-    C = global&A
+    X = fun(C)

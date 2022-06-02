@@ -1,0 +1,12 @@
+def test(arg):
+    block umm
+    umm -> arg
+    return arg
+
+diagseq seq:
+    block hej
+    block klej
+    klej -> hej labeled "return"
+    hej -> klej
+    hej -> klej labeled "mess"
+    exec

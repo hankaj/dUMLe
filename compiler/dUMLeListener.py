@@ -143,15 +143,6 @@ class dUMLeListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dUMLeParser#block_operation.
-    def enterBlock_operation(self, ctx:dUMLeParser.Block_operationContext):
-        pass
-
-    # Exit a parse tree produced by dUMLeParser#block_operation.
-    def exitBlock_operation(self, ctx:dUMLeParser.Block_operationContext):
-        pass
-
-
     # Enter a parse tree produced by dUMLeParser#obj_access.
     def enterObj_access(self, ctx:dUMLeParser.Obj_accessContext):
         pass

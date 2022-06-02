@@ -1,11 +1,23 @@
 from compiler.utils.output_generator import Mode
 from typing import List, Optional
-from compiler.utils.object import Object
+from compiler.utils.object import Object, Class, UseCase, Actor, Block
+from enum import Enum, auto
 from compiler.utils.exceptions import ObjectNotDeclaredException
 
 
+class DiagType(Enum):
+    CLASS = auto()
+    USE_CASE = auto()
+    SEQUENCE = auto()
+
+
+OBJECTS_IN_DIAGRAMS = {DiagType.CLASS: [Class], DiagType.USE_CASE: [UseCase, Actor], DiagType.SEQUENCE: [Block]}
+
+
 class DiagGenerator:
-    def __init__(self):
+    def __init__(self, diag_type: DiagType):
+        self.type = diag_type
+        self.available_object_types = OBJECTS_IN_DIAGRAMS[diag_type]
         self.objects = []
 
     def generate(self, mode: Mode, object_list_names: Optional[List[str]] = None) -> str:

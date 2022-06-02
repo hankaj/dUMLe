@@ -28,8 +28,7 @@ instruction
     | fun_declaration
     | execution
     | loop
-    | connection
-    | block_operation;
+    | connection;
 
 obj_declaration
     : class_declaration
@@ -67,9 +66,6 @@ loop
 connection
     : (name | obj_access | list_access) BR+ (ARROW | CONNECTION_TYPE) BR+ (name | obj_access | list_access) (BR+ 'labeled' BR+ TEXT )? BR* NL*;
     
-block_operation
-    : BLOCK_OPERATION_TYPE BR+ (name | obj_access | list_access) BR* NL;
-    
 obj_access
     : name '.' (name | obj_access);
 
@@ -85,7 +81,7 @@ note
     (NL* IND+ TEXT BR* NL*)+;
 
 actor
-    : 'actor' (BR+ name)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
+    : 'actor' (BR+ name)? BR+ NAME BR* NL;
 
 theme
     : 'theme' BR+ NAME BR* ':' BR* NL
@@ -102,7 +98,7 @@ arg_list_include_scope
     : (arg_name BR* (',' BR* arg_name)*)?;
     
 block
-    : 'block' (BR+ name)? BR+ NAME (BR+ 'labeled' BR+ TEXT )? BR* NL;
+    : 'block' (BR+ name)? BR+ NAME BR* NL;
 
 use_case
     : 'usecase' (BR+ name)? BR+ NAME BR* ':' BR* NL
@@ -139,10 +135,6 @@ MODIFIER
     : 'public'
     | 'protected'
     | 'private';
-
-BLOCK_OPERATION_TYPE
-    : 'activate'
-    | 'destroy';
 
 CR
 	: 

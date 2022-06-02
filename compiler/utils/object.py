@@ -17,7 +17,7 @@ class Connection:
         self.source_object_name = ctx.name(0).getText()
         self.destination_object_name = ctx.name(1).getText()
         if ctx.TEXT():
-            self.label = ctx.TEXT()[1:-1]
+            self.label = ctx.TEXT().getText()[1:-1]
         if ctx.ARROW():
             self.arrow = str(ctx.ARROW())
         else:
@@ -149,40 +149,33 @@ class UseCase(Object):
         super().__init__()
         self.content = []
 
-        if ctx.name()[0]:
-            self.themeName = str(ctx.name()[0])
+        if ctx.name():
+            self.themeName = ctx.name().getText()
 
-        self.name = str(ctx.NAME()[0])
+        self.name = ctx.NAME().getText()
 
         for line in ctx.TEXT():
-            self.content.append(line)
+            self.content.append(line.getText())
 
     def _generate(self):
         res = 'usecase ('
         for i in range(len(self.content)):
-            res += str(self.content[i])
-        res += ')\n'
+            res += self.content[i]
+        res += f') as {self.name}\n'
         return res
 
 
 class Block(Object):
     def __init__(self, ctx: dUMLeParser.BlockContext):
         super().__init__()
-        self.label = ""
 
         if ctx.name():
-            self.theme_name = str(ctx.name()[0])
+            self.theme_name = ctx.name().getText()
 
-        self.name = str(ctx.NAME()[0])
-
-        if ctx.TEXT():
-            self.label = str(ctx.TEXT()).replace('"', '')
+        self.name = ctx.NAME().getText()
 
     def _generate(self):
-        res = "block :" + str(self.name) + ":"
-        if self.label != "":
-            res += ' as ' + self.label
-        return res
+        return f"participant {self.name}\n"
 
 
 class Class(Object):
@@ -194,11 +187,11 @@ class Class(Object):
             if class_declaration_line.MODIFIER():
                 access_type = {"private": "-", "public": "+", "protected": "#"}
                 self.class_body += (access_type[str(class_declaration_line.MODIFIER())])
-            self.class_body+= str(class_declaration_line.TEXT())[1:-1] + "\n"
+            self.class_body += class_declaration_line.TEXT().getText()[1:-1] + "\n"
 
         if ctx.name():
-            self.theme = str(ctx.name())
-        self.name = str(ctx.NAME())
+            self.theme = ctx.name().getText()
+        self.name = ctx.NAME().getText()
 
     def _generate(self) -> str:
         result = "class " + self.name + " {\n"
@@ -210,28 +203,21 @@ class Class(Object):
 class Actor(Object):
     def __init__(self, ctx: dUMLeParser.ActorContext):
         super().__init__()
-        self.name = ""
-        self.label = ""
 
         if ctx.name():
             # todo: theme is used in object
-            self.theme_name = str(ctx.name()[0])
-        self.name = str(ctx.NAME()[0])
-
-        if ctx.TEXT():
-            self.label = str(ctx.TEXT()).replace('"', '')
+            self.theme_name = ctx.name().getText()
+        self.name = ctx.NAME().getText()
 
     def _generate(self):
         res = "actor :" + str(self.name) + ":"
-        if self.label != "":
-            res += ' as ' + self.label
-        return res
+        return res + '\n'
 
 
 class Package(Object):
     def __init__(self, ctx: dUMLeParser.Package_declarationContext):
         super().__init__()
-        self.name = str(ctx.NAME()[0])
+        self.name = ctx.NAME().getText()
         self.names = []
         self.objects = []
 
