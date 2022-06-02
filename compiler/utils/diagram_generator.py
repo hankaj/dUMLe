@@ -1,6 +1,7 @@
 from compiler.utils.output_generator import Mode
 from typing import List, Optional
 from compiler.utils.object import Object
+from compiler.utils.exceptions import ObjectNotDeclaredException
 
 
 class DiagGenerator:
@@ -23,4 +24,4 @@ class DiagGenerator:
         for obj in self.objects:
             if obj.name == name:
                 return obj
-        raise Exception(f"Cannot find object with given name {name}")
+        raise ObjectNotDeclaredException(name)

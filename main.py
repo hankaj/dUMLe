@@ -54,8 +54,8 @@ def execute_dumle(input_stream):
         print("Executing diagrams...")
         walker.walk(execution_listener, tree)
 
-        print("Debug information:")
-        output_generator.debug()
+        #print("Debug information:")
+        #output_generator.debug()
     except Exception as e:
         print("Error message: " + str(e))
         traceback.print_exc()

@@ -4,6 +4,7 @@ from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 from typing import Tuple
 from compiler.utils.object import Object, Connection
+from compiler.utils.exceptions import ObjectNotDeclaredException
 
 
 class FunctionCalldUMLeListener(dUMLeListener):
@@ -104,7 +105,10 @@ class FunctionCalldUMLeListener(dUMLeListener):
         elif ctx.arg_list_include_scope():
             arg_names = [arg_name.name().getText() for arg_name in ctx.arg_list_include_scope().arg_name()]
             is_deep_copy = [True if arg_name.DEEP_COPY() else False for arg_name in ctx.arg_list_include_scope().arg_name()]
-            arg_list = self.output_generator.get_objects(arg_names, is_deep_copy, self.current_scope_name)
+            try:
+                arg_list = self.output_generator.get_objects(arg_names, is_deep_copy, self.current_scope_name)
+            except ObjectNotDeclaredException as e:
+                raise Exception(f"{e}. Line: {ctx.stop.line} ")
             returned_objects = Object.change_names(arg_list, returned_arg_names)
 
         for object in returned_objects:
@@ -130,4 +134,4 @@ class FunctionCalldUMLeListener(dUMLeListener):
                     if existing_object.name == object.name:
                         objects.remove(existing_object)
                         break
-                objects.append(object)
+                self.output_generator.global_objects[object.name] = object

@@ -1,0 +1,10 @@
+def fun(arg):
+    note arg:
+        "notateczka"
+    return arg
+
+diagclass test:
+    exec
+    class A:
+        public "A()"
+    C = fun(A)

@@ -122,6 +122,8 @@ class Object(ABC):
                     else:
                         new_connections[connection.destination_object_name].append(connection)
             object.name = new_names[object.name]
+            if object.note:
+                object.note.object_name = object.name
             object.connections = new_connections
         return objects
 

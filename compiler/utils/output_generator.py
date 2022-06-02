@@ -5,7 +5,7 @@ from compiler.utils.function_generator import FunctionGenerator
 from compiler.utils.object import Object
 from compiler.utils.register import Register
 import os
-from copy import  deepcopy
+from copy import deepcopy
 
 
 class Mode(Enum):

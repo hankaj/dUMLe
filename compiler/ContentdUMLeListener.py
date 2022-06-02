@@ -96,13 +96,12 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
         note = Note(ctx)
-        # todo: support theme
 
         if self.is_in_function:
             self.output_generator.get_function(self.register.parent_name(self.current_function_name),
                                                self.current_function_name).notes_to_create.append(note)
         elif self.is_in_diagram:
-            for object in self.output_generator.diagram_generators[self.current_diagram_name]:
+            for object in self.output_generator.diagram_generators[self.current_diagram_name].objects:
                 if object.name == note.object_name:
                     object.add_note(note)
                     break
