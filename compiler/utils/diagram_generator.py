@@ -19,6 +19,7 @@ class DiagGenerator:
         self.type = diag_type
         self.available_object_types = OBJECTS_IN_DIAGRAMS[diag_type]
         self.objects = []
+        self.sequences = []
 
     def generate(self, mode: Mode, object_list_names: Optional[List[str]] = None) -> str:
         # todo: support mode
@@ -26,11 +27,24 @@ class DiagGenerator:
         if object_list_names is None:
             return self._generate_all()
         else:
-            return "".join(obj.generate() for obj in self.objects if obj.name in object_list_names) \
+            generated_objects = "".join(obj.generate() for obj in self.objects if obj.name in object_list_names)
+            if self.type == DiagType.SEQUENCE:
+                return generated_objects + self._generate_sequences(object_list_names)
+            return generated_objects \
                 + "".join(obj.generate_connections(object_list_names) for obj in self.objects if obj.name in object_list_names)
 
     def _generate_all(self) -> str:
-        return "".join(obj.generate() for obj in self.objects)+"".join(obj.generate_connections() for obj in self.objects)
+        generated_objects = "".join(obj.generate() for obj in self.objects)
+        if self.type == DiagType.SEQUENCE:
+            return generated_objects + self._generate_sequences()
+        return generated_objects + "".join(obj.generate_connections() for obj in self.objects)
+
+    def _generate_sequences(self, object_list_names: List[str] | None = None):
+        if object_list_names is None:
+            return "".join(sequence.generate() for sequence in self.sequences)
+        return "".join(sequence.generate() for sequence in self.sequences
+                       if sequence.source_object_name in object_list_names
+                       and sequence.destination_object_name in object_list_names)
 
     def get_object(self, name: str) -> Object:
         for obj in self.objects:

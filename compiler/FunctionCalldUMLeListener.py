@@ -82,6 +82,8 @@ class FunctionCalldUMLeListener(dUMLeListener):
                 if object.name == connection.source_object_name:
                     object.add_connection(connection)
                     break
+            if self.current_diagram_type == DiagType.SEQUENCE:
+                self.output_generator.diagram_generators[self.current_diagram_name].sequences.append(connection)
         else: # global
             self.output_generator.global_objects[connection.source_object_name].add_connection(connection)
 
