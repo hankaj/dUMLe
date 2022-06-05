@@ -1,7 +1,7 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.register import Register, Scope, FunctionDescriptor
-from compiler.utils.object import Object, Theme, Actor, UseCase, Class, Connection, Block, Note, Package
+from compiler.utils.register import Register
+from compiler.utils.object import Object, Actor, UseCase, Class, Connection, Block, Note
 from compiler.utils.function_generator import FunctionGenerator
 from compiler.utils.output_generator import OutputGenerator
 from compiler.utils.diagram_generator import DiagGenerator, DiagType
@@ -37,10 +37,11 @@ class ContentdUMLeListener(dUMLeListener):
             self.output_generator.get_function(self.register.parent_name(self.current_function_name),
                                                self.current_function_name).fixed_objects.append(object)
         elif self.is_in_diagram:
-            if self.current_diagram_name not in self.output_generator.diagram_generators:
-                self.output_generator.diagram_generators[self.current_diagram_name].objects = [object]
-            else:
-                self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
+            # if self.current_diagram_name not in self.output_generator.diagram_generators:
+            #     self.output_generator.diagram_generators[self.current_diagram_name].objects = [object]
+            # else:
+            #     self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
+            self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
         else:  # global
             self.output_generator.global_objects[object.name] = object
 
@@ -125,10 +126,6 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
         raise Exception(f"Theme is not yet supported. Line: {ctx.stop.line}")
-
-    def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        package = Package(ctx)
-        # todo: implement
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
         if self.current_diagram_type is not None and self.current_diagram_type != DiagType.CLASS:

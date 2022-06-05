@@ -89,7 +89,11 @@ class IndexingdUMLeListener(dUMLeListener):
         self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
+        self.register.add_object_to_scope(ctx.NAME(0).getText(), self.current_scope_name)
 
     def enterClass_declaration(self, ctx: dUMLeParser.Class_declarationContext):
         self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
+
+    def enterAssignment(self, ctx:dUMLeParser.AssignmentContext):
+        for name in ctx.arg_list().NAME():
+            self.register.add_object_to_scope(name.getText(), self.current_scope_name)

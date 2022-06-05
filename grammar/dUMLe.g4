@@ -57,10 +57,10 @@ fun_call
     : name '(' BR* arg_list_include_scope BR* ')' BR*;
 
 execution
-    : 'exec' (BR+ NAME)? (BR+ MODE)? (BR+ (list_declaration | list_access | NAME | obj_access))? (BR+ TEXT)? BR* NL;
+    : 'exec' (BR+ NAME)? (BR+ MODE)? (BR+ (list_declaration | list_access | NAME))? (BR+ TEXT)? BR* NL;
 
 loop
-    : 'for' BR+ NAME BR+ 'in' BR+ (name | list_declaration | obj_access | fun_call) BR* ':' BR* NL
+    : 'for' BR+ NAME BR+ 'in' BR+ (name | list_declaration | fun_call) BR* ':' BR* NL
         (NL* IND+ instruction NL*)+;
         
 connection
@@ -88,8 +88,8 @@ theme
     (NL* IND+ PARAM_TYPE BR+ TEXT BR* NL*)+;
 
 package_declaration
-    : 'package' (BR+ name)? BR+ NAME BR* ':' BR* NL
-    (NL* IND+ (name | obj_access | list_access) BR* NL*)+;
+    : 'package' BR+ PACKAGE_TYPE BR+ NAME BR* ':' BR* NL
+    (NL* IND+ NAME BR* NL*)+;
 
 arg_list
     : NAME BR* (',' BR* NAME)*;
@@ -109,6 +109,11 @@ name
 
 arg_name
     : DEEP_COPY?name;
+
+PACKAGE_TYPE
+    : 'CLASS'
+    | 'USECASE'
+    | 'SEQ';
 
 CLASS_TYPE
     : 'class'

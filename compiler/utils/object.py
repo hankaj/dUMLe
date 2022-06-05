@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
-from copy import copy, deepcopy
 
 from compiler.dUMLeParser import dUMLeParser
+from compiler.utils.exceptions import WrongDiagramTypeException
 
 
 @dataclass
@@ -54,6 +54,7 @@ class Note:
 
 class Object(ABC):
     def __init__(self):
+        self.is_package = False
         self.name = ""
         self.note = None
         self.theme = None  # todo: implement theme
@@ -67,9 +68,7 @@ class Object(ABC):
         ...
 
     def generate(self) -> str:
-        result = ""
-        result += self._generate()
-
+        result = self._generate()
         # implement theme here
 
         if self.note:
@@ -192,9 +191,10 @@ class Class(Object):
         if ctx.name():
             self.theme = ctx.name().getText()
         self.name = ctx.NAME().getText()
+        self.class_type = ctx.CLASS_TYPE().getText()
 
     def _generate(self) -> str:
-        result = "class " + self.name + " {\n"
+        result = self.class_type + " " + self.name + " {\n"
         result += self.class_body
         result += "}\n"
         return result
@@ -215,11 +215,32 @@ class Actor(Object):
 
 
 class Package(Object):
-    def __init__(self, ctx: dUMLeParser.Package_declarationContext):
+    def __init__(self, ctx: dUMLeParser.Package_declarationContext, objects: List[Object]):
+        from compiler.utils.diagram_generator import DiagType
+        types = {"CLASS": DiagType.CLASS, "USECASE": DiagType.USE_CASE, "SEQ": DiagType.SEQUENCE}
         super().__init__()
-        self.name = ctx.NAME().getText()
-        self.names = []
-        self.objects = []
+        self.name = ctx.NAME(0).getText()
+        self.objects = objects
+        self.type = types[ctx.PACKAGE_TYPE().getText()]
+        self._verify_objects()
+        self.is_package = True
+
+    def _verify_objects(self):
+        from compiler.utils.diagram_generator import OBJECTS_IN_DIAGRAMS
+        available_objects = OBJECTS_IN_DIAGRAMS[self.type]
+        for o in self.objects:
+            if type(o) not in available_objects:
+                raise WrongDiagramTypeException(self.type, type(o))
 
     def _generate(self):
-        return ""
+        from compiler.utils.diagram_generator import DiagType
+        generated_objects = "".join(obj.generate() for obj in self.objects)
+        if self.type == DiagType.SEQUENCE:
+            return f"box {self.name}\n" \
+                   f"{generated_objects}\n" \
+                   f"end box\n"
+        names = [o.name for o in self.objects]
+        connections = "".join(obj.generate_connections(names) for obj in self.objects)
+        package_type = "namespace" if self.type == DiagType.CLASS else "package"
+        return f"{package_type} {self.name}" + "{\n" + generated_objects + connections + "}\n"
+

@@ -5,20 +5,6 @@ def fun2():
 
 A = fun2()
 
-
-list = [A, B, C]
-
-def fun(list, i):
-    if list.len < i:
-        return list
-    list[i] -> list[i+1]
-    list = fun(list, i+1)
-
-list = fun(list, 0)
-
-
-
-
 def fun(arg):
     arg = fun(arg)
     arg -> global&A

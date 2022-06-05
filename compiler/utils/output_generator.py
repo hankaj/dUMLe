@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import List, Tuple
 from plantuml import PlantUML
 from compiler.utils.function_generator import FunctionGenerator
+from compiler.utils.exceptions import ObjectNotDeclaredException
 from compiler.utils.object import Object
 from compiler.utils.register import Register
 import os
@@ -57,7 +58,10 @@ class OutputGenerator:
             raise Exception("Scope name is none. Object generator function: get_object()")
 
         if scope_name == "global":
-            return self.global_objects[object_name]
+            try:
+                return self.global_objects[object_name]
+            except KeyError:
+                raise ObjectNotDeclaredException(name)
         else:
             return self.diagram_generators[scope_name].get_object(object_name)
 

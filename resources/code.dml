@@ -8,7 +8,7 @@ def fun(arg):
 class A:
     private "void print()"
 
-diagclass CLASS:
+diagclass test:
     exec
     class C:
         protected "C()"

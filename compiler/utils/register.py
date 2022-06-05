@@ -21,10 +21,12 @@ class Register:
         self.global_scope = Scope(parent=None, object_register=[], function_register={}, name='global')
         self.scopes = {'global': self.global_scope}
 
-    def is_object_in_scope(self, object_name: str, scope_name: str) -> bool:
+    def is_object_in_scope(self, object_name: str, scope_name: str, with_outer: bool = True) -> bool:
         if scope_name is None:
             return False
         if object_name not in self.scopes[scope_name].object_register:
+            if not with_outer:
+                return False
             return self.is_object_in_scope(object_name, self.parent_name(scope_name))
         return True
 
@@ -36,9 +38,11 @@ class Register:
         return True
 
     def add_object_to_scope(self, object_name: str, scope_name: str) -> None:
-        #if self.is_object_in_scope(object_name, scope_name): # TODO: find only in the current scope. do not search the whole scope
-            #raise Exception("Object \"" + object_name + "\" is already declared in scope \"" + scope_name + "\"")
+        if self.is_object_in_scope(object_name, scope_name, False):
+            raise Exception(f"Object {object_name} is already declared in scope {scope_name}")
         self.scopes[scope_name].object_register.append(object_name)
+
+    # def remove_object_from_scope
 
     def add_function_to_scope(self, function_name: str, function_descriptor: FunctionDescriptor, scope_name: str) -> None:
         if self.is_function_in_scope(function_name, scope_name):

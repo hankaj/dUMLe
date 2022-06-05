@@ -96,8 +96,5 @@ class ExecutiondUMLeListener(dUMLeListener):
             raise Exception(f"List access is not supported. Line: {ctx.stop.line}")
         elif ctx.NAME(1):
             raise Exception(f"List name is not supported. Line: {ctx.stop.line}")
-        elif ctx.obj_access():
-            raise Exception(f"Object access is not supported. Line: {ctx.stop.line}")
 
-        for diagram_generator in self.output_generator.diagram_generators:
-            self.output_generator.generate(diagram_generator, mode, object_list, file_name)
+        self.output_generator.generate(diag_name, mode, object_list, file_name)

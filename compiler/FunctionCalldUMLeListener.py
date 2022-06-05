@@ -3,7 +3,8 @@ from compiler.dUMLeParser import dUMLeParser
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 from typing import Tuple, List
-from compiler.utils.object import Object, Connection, Class
+from compiler.utils.object import Object, Connection, Package
+from compiler.utils.exceptions import WrongDiagramTypeException
 from compiler.utils.exceptions import ObjectNotDeclaredException
 from compiler.utils.diagram_generator import DiagType
 
@@ -68,7 +69,7 @@ class FunctionCalldUMLeListener(dUMLeListener):
     def exitUse_case_diagram(self, ctx: dUMLeParser.Use_case_diagramContext):
         self._exit_diag()
 
-    def _get_scope_if_exists(self, name: str) -> Tuple['str|None', str]:
+    def _get_scope_if_exists(self, name: str) -> Tuple[str|None, str]:
         if "&" in name:
             return name.split("&")[0], name.split("&")[1]
         return None, name
@@ -76,7 +77,13 @@ class FunctionCalldUMLeListener(dUMLeListener):
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
         if self.is_in_function:
             return
+
         connection = Connection(ctx)
+        if not self.register.is_object_in_scope(connection.source_object_name, self.current_scope_name):
+            raise Exception(f"No {connection.source_object_name} object in {self.current_scope_name} scope")
+        if not self.register.is_object_in_scope(connection.destination_object_name, self.current_scope_name):
+            raise Exception(f"No {connection.destination_object_name} object in {self.current_scope_name} scope")
+
         if self.is_in_diagram:
             for object in self.output_generator.diagram_generators[self.current_diagram_name].objects:
                 if object.name == connection.source_object_name:
@@ -106,10 +113,36 @@ class FunctionCalldUMLeListener(dUMLeListener):
 
         return Object.change_names(returned_objects, returned_arg_names)
 
-    def enterAssignment(self, ctx:dUMLeParser.AssignmentContext):
+    def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
+        # TODO: support object access and list access
+        if self.is_in_function:
+            raise Exception(f"Cannot declare package inside of the function")
+        object_names = [name.getText() for name in ctx.NAME()]
+        object_names.pop(0)
+        is_deep_copy = [True for _ in enumerate(object_names)]
+        try:
+            objects = self.output_generator.get_objects(object_names, is_deep_copy, self.current_scope_name)
+        except ObjectNotDeclaredException as e:
+            raise Exception(f"{e} Line: {ctx.stop.line}")
+        try:
+            package = Package(ctx, objects)
+        except WrongDiagramTypeException as e:
+            raise Exception(f"{e} Line {ctx.stop.line}")
+        if self.is_in_diagram:
+            self.output_generator.diagram_generators[self.current_diagram_name].objects.append(package)
+            for o in package.objects:
+                objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
+                for existing_object in objects:
+                    if existing_object.name == o.name:
+                        objects.remove(existing_object)
+                        break
+        else:
+            self.output_generator.global_objects[package.name] = package
+
+
+    def enterAssignment(self, ctx: dUMLeParser.AssignmentContext):
         if ctx.list_declaration():  # list declaration
             raise Exception(f"List declaration not supported. Line: {ctx.stop.line}")
-            pass
 
         returned_arg_names = [name.getText() for name in ctx.arg_list().NAME()]
         returned_objects = []
@@ -128,6 +161,8 @@ class FunctionCalldUMLeListener(dUMLeListener):
 
         for object in returned_objects:
             if self.is_in_function:
+                if object.is_package:
+                    raise Exception(f"You cannot add package to function. Line: {ctx.stop.line}")
                 objects = self.output_generator.get_function(
                     self.register.get_nearest_scope_name(self.current_scope_name, self.current_function_name),
                     self.current_function_name).fixed_objects
@@ -137,6 +172,8 @@ class FunctionCalldUMLeListener(dUMLeListener):
                         break
                 objects.append(object)
             elif self.is_in_diagram:
+                if object.is_package and object.type != self.current_diagram_type:
+                    raise Exception(f"You cannot add package of type {object.type} to {self.current_diagram_type}")
                 objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
                 for existing_object in objects:
                     if existing_object.name == object.name:

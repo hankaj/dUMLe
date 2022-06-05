@@ -50,4 +50,8 @@ class DiagGenerator:
         for obj in self.objects:
             if obj.name == name:
                 return obj
+            # if obj.is_package:
+            #     for package_obj in obj.objects:
+            #         if package_obj.name == name:
+            #             return package_obj
         raise ObjectNotDeclaredException(name)

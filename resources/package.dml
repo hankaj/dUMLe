@@ -1,0 +1,51 @@
+class H:
+    private "H()"
+
+class G:
+    private "G()"
+
+class H1:
+    private "H1()"
+
+class G1:
+    private "G1()"
+
+package CLASS paczka:
+    H
+    G
+
+diagclass hello:
+    class C:
+        private "C()"
+    class D:
+        private "D()"
+    package CLASS paczka_diag:
+        C
+        D
+    C -> D
+    class F:
+        private "F()"
+    paczka_global = global&paczka
+
+diagclass umm:
+    p = hello&paczka_diag
+    r = hello&paczka_diag
+    exec
+
+diagclass dostep:
+    class A:
+        public "A()"
+    package CLASS p:
+        A
+
+diagseq test:
+    block A
+    block B
+    package SEQ paczka:
+        A
+        B
+    r = paczka
+    exec
+
+diagusecase uc:
+    actor on
