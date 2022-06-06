@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
 from compiler.utils.register import Register
@@ -20,6 +22,9 @@ class FunctionCalldUMLeListener(dUMLeListener):
         self.is_in_function = False
         self.current_function_name = ""
         self.current_diagram_name = ""
+
+        self.list_names = {}
+
 
     def exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
@@ -139,10 +144,27 @@ class FunctionCalldUMLeListener(dUMLeListener):
         else:
             self.output_generator.global_objects[package.name] = package
 
+    def _enterList_declaration(self, list_ctx, name):
+        list_items = [n.getText() for n in list_ctx.name()]
+        self.list_names[name.getText()] = len(list_items)
+
+    def enterList_access(self, ctx: dUMLeParser.List_accessContext):
+        name = ctx.name().NAME().getText()
+
+        if name not in self.list_names.keys():
+            raise Exception(f"List doesn't exists. Line: {ctx.stop.line}")
+
+        digit = str(ctx.DIGIT(0))
+        if int(digit) >= self.list_names[name]:
+            raise Exception(f"Index out of range. Line: {ctx.stop.line}")
 
     def enterAssignment(self, ctx: dUMLeParser.AssignmentContext):
         if ctx.list_declaration():  # list declaration
-            raise Exception(f"List declaration not supported. Line: {ctx.stop.line}")
+            if ctx.list_declaration():  # list declaration
+                if len(ctx.arg_list().NAME()) > 1:
+                    raise Exception(f"List can't be assigned to more than one name. Line: {ctx.stop.line}")
+
+                self._enterList_declaration(ctx.list_declaration(), ctx.arg_list().NAME()[0])
 
         returned_arg_names = [name.getText() for name in ctx.arg_list().NAME()]
         returned_objects = []
@@ -158,6 +180,9 @@ class FunctionCalldUMLeListener(dUMLeListener):
             except ObjectNotDeclaredException as e:
                 raise Exception(f"{e}. Line: {ctx.stop.line} ")
             returned_objects = Object.change_names(arg_list, returned_arg_names)
+
+        # elif ctx.list_declaration():
+        #     list_items = [name.name().getText() for name in ctx.list_declaration().name()]
 
         for object in returned_objects:
             if self.is_in_function:
