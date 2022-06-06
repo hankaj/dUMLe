@@ -1,0 +1,16 @@
+@startuml
+class C {
+#C()
+}
+class D {
+#D()
+}
+class G {
++asdG()
+}
+class H {
++asdH()
+}
+C <|-- D
+D o-- C
+@enduml
