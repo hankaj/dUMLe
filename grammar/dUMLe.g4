@@ -54,7 +54,7 @@ fun_declaration
         IND+ 'return' BR+ arg_list BR* NL;
         
 fun_call
-    : name '(' BR* arg_list_include_scope BR* ')' BR*;
+    : name '(' BR* arg_list_include_scope BR* ')' BR* NUMBER? BR*;
 
 execution
     : 'exec' (BR+ NAME)? (BR+ MODE)? (BR+ (list_declaration | list_access | NAME))? (BR+ TEXT)? BR* NL;
@@ -173,6 +173,10 @@ SCOPE_NAME
 NAME
     :
     [A-Za-z_][a-zA-Z0-9_]*;
+
+NUMBER
+    :
+    [0-9]+;
     
 NL
     :
