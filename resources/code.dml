@@ -39,6 +39,6 @@ diagclass main:
     class V:
         public "V()"
 
-    G, H = recursion(W, V) 5
+    G, H = recursion(W, V) 3
 
     exec [G, H]

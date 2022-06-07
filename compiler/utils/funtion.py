@@ -23,6 +23,12 @@ class Function:
         self.max_recursion_depth_count = 0  # this value should be set before calling the method call
         self.was_max_reached = False
 
+    def set_max_depth(self, max_depth: int):
+        if self.current_recursion_depth_count > 0:
+            return
+        else:
+            self.max_recursion_depth_count = max_depth
+
     def activate(self):
         if self.was_max_reached:
             raise RecursionDepthException(self.max_recursion_depth_count)
