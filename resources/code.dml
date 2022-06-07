@@ -19,7 +19,7 @@ def fun2(A2, B2):
 
 def fun3():
     A3, B3 = fun1()
-    C3, D3 = fun2(A3, $B3)
+    C3, D3 = fun2($A3, $B3)
     class E3:
         protected "E3()"
 
@@ -27,6 +27,18 @@ def fun3():
 
     return C3, D3, E3
 
+def recursion(arg1, arg2):
+    arg1 inherit arg2
+    arg1, arg2 = recursion($arg1, $arg2)
+    return arg1, arg2
+
 diagclass main:
-    A, B, C = fun3()
-    exec
+    class W:
+        public "W()"
+
+    class V:
+        public "V()"
+
+    G, H = recursion(W, V)
+
+    exec [G, H]

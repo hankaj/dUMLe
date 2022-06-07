@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import List
 from antlr4 import ParseTreeWalker
 
+from compiler.utils.exceptions import RecursionDepthException
 from compiler.utils.object import Object
 
 
@@ -16,6 +17,24 @@ class Function:
         self.ctx = []  # the list that contains ctx objects that have to be called sequentially
         self.argument_names = argument_names
         self.return_names = return_names
+
+        # flags for recursion
+        self.current_recursion_depth_count = 0
+        self.max_recursion_depth_count = 0  # this value should be set before calling the method call
+        self.was_max_reached = False
+
+    def activate(self):
+        if self.was_max_reached:
+            raise RecursionDepthException(self.max_recursion_depth_count)
+
+        self.current_recursion_depth_count += 1
+        if self.max_recursion_depth_count <= self.current_recursion_depth_count:
+            self.was_max_reached = True
+
+    def release(self):
+        self.current_recursion_depth_count -= 1
+        if self.current_recursion_depth_count == 0:
+            self.was_max_reached = False
 
     def call(self, output_generator, register, parameters: List[Object], returned_object_names: List[str], scope_name: str) -> List:
         # changing name of the parameters

@@ -33,6 +33,8 @@ def execute_dumle(input_stream):
         register = Register()
 
         # validating the code
+
+        # todo: merge indexing and validating
         indexing_listener = IndexingdUMLeListener(register, error)
         validating_listener = ValidatingdUMLeListener(register, error)
         print("Indexing...")
@@ -50,6 +52,8 @@ def execute_dumle(input_stream):
         print("Creating functions...")
         function_listener = FunctiondUMLeListener(register, output_generator)
         walker.walk(function_listener, tree)
+
+        # todo: merge executing and creating content
 
         print("Creating content...")
         content_listener = ContentdUMLeListener(register, output_generator)

@@ -4,6 +4,7 @@ from typing import Tuple, List
 
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
+from compiler.utils.exceptions import RecursionDepthException
 from compiler.utils.register import Register
 from compiler.utils.object import Object, Actor, UseCase, Class, Connection, Block, Note, Package
 from compiler.utils.output_generator import OutputGenerator
@@ -257,21 +258,22 @@ class ContentdUMLeListener(dUMLeListener):
         if scope_name is None:
             scope_name = self.register.get_nearest_scope_name(self.current_scope_name, fun_name)
 
-        # copy object from proper place
+        # copy argument objects from proper place
         if self.mode is ContentdUMLeListenerMode.MAIN:
             # get copy of the objects from diagram generator
             arg_list = self._get_arg_copy_from_diagram(arg_names, is_deep_copy)
-
-            # call the function
-            returned_objects = self.output_generator.get_function(scope_name, fun_name).call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
             # get copy of the objects from the list of objects created by the function
             arg_list = self._get_arg_copy_from_function(arg_names, is_deep_copy)
-
-            # call the function
-            returned_objects = self.output_generator.get_function(scope_name, fun_name).call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
+
+        # call the function and set up maximum recursion depth
+        function = self.output_generator.get_function(scope_name, fun_name)
+        function.max_recursion_depth_count = 100  # maximum depth of the recursion # todo: fix depth
+        function.activate()  # this will increase the current recursion depth and throw the RecursionDepthException if the limit is reached
+        returned_objects = function.call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
+        function.release()  # this will decrease the current recursion depth
 
         # verify if the object is legal for the current diagram
         if self.is_in_diagram:
@@ -291,9 +293,12 @@ class ContentdUMLeListener(dUMLeListener):
         if ctx.list_declaration():  # list declaration (a = [])
             raise Exception(f"List declaration not supported. Line: {ctx.stop.line}")
         elif ctx.fun_call():  # function call (a = fun())
-            if self.mode is ContentdUMLeListenerMode.MAIN and self.is_in_function:  # ignore calling function in other functions
-                return
-            returned_objects = self._call_function(ctx.fun_call(), returned_arg_names, ctx.stop.line)
+            try:
+                if self.mode is ContentdUMLeListenerMode.MAIN and self.is_in_function:  # ignore calling function in other functions
+                    return
+                returned_objects = self._call_function(ctx.fun_call(), returned_arg_names, ctx.stop.line)
+            except RecursionDepthException:
+                return  # just leave the function if the max depth of the recursion was reached
         elif ctx.arg_list_include_scope():  # simple assignment (x, y, z = a, b, c)
             arg_names = [arg_name.name().getText() for arg_name in ctx.arg_list_include_scope().arg_name()]
             is_deep_copy = [True if arg_name.DEEP_COPY() else False for arg_name in
