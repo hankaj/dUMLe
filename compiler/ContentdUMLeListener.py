@@ -270,7 +270,9 @@ class ContentdUMLeListener(dUMLeListener):
 
         # call the function and set up maximum recursion depth
         function = self.output_generator.get_function(scope_name, fun_name)
-        function.max_recursion_depth_count = 100  # maximum depth of the recursion # todo: fix depth
+        function.max_recursion_depth_count = 1  # default max depth
+        if fun_ctx.NUMBER():
+            function.max_recursion_depth_count = int(fun_ctx.NUMBER().getText())
         function.activate()  # this will increase the current recursion depth and throw the RecursionDepthException if the limit is reached
         returned_objects = function.call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
         function.release()  # this will decrease the current recursion depth
