@@ -1,6 +1,32 @@
-def fun(arg):
-    class G:
-        private "asedasd()"
-    arg -> G
+def fun1():
+    class A1:
+        public "A1()"
 
-    return arg, G
+    class B1:
+        public "B1()"
+
+    class C1:
+        public "C1()"
+
+    B1 inherit C1
+    C1 aggregate B1
+
+    return B1, C1
+
+def fun2(A2, B2):
+    B2 associate A2
+    return A2, B2
+
+def fun3():
+    A3, B3 = fun1()
+    C3, D3 = fun2(A3, B3)
+    class E3:
+        protected "E3()"
+
+    C3 inherit E3
+
+    return C3, D3, E3
+
+diagclass main:
+    A, B, C = fun3()
+    exec

@@ -51,8 +51,8 @@ def execute_dumle(input_stream):
         walker.walk(function_listener, tree)
 
         print("Creating content...")
-        content_listener = ContentdUMLeListener()
-        content_listener.set_global_listener(register, output_generator)
+        content_listener = ContentdUMLeListener(register, output_generator)
+        content_listener.set_global_listener()
         walker.walk(content_listener, tree)
 
         print("Executing...")

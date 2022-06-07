@@ -18,10 +18,10 @@ class ContentdUMLeListenerMode(Enum):
 
 
 class ContentdUMLeListener(dUMLeListener):
-    def __init__(self):
+    def __init__(self, register: Register, output_generator: OutputGenerator):
         # useful when content listener is called by main.py
-        self.register = None
-        self.output_generator = None
+        self.register = register
+        self.output_generator = output_generator
         self.current_scope_name = None
         self.is_in_diagram = None
         self.is_in_function = None
@@ -73,13 +73,11 @@ class ContentdUMLeListener(dUMLeListener):
         else:
             raise Exception("Content listener is not activated. Specify the source of the code")
 
-    def set_global_listener(self, register: Register, output_generator: OutputGenerator):
+    def set_global_listener(self):
         if self.mode != ContentdUMLeListenerMode.NOT_ACTIVE:
             raise Exception("Cannot activate content listener. Content listener is already activated")  # todo: change exception type
 
         # activating content listener to main mode
-        self.register = register
-        self.output_generator = output_generator
         self.current_scope_name = self.register.global_scope.name
         self.is_in_diagram = False
         self.is_in_function = False
@@ -256,24 +254,24 @@ class ContentdUMLeListener(dUMLeListener):
         is_deep_copy = [True if arg_name.DEEP_COPY() else False for arg_name in
                         fun_ctx.arg_list_include_scope().arg_name()]
 
+        # get current scope and function name
+        scope_name, fun_name = self._get_scope_if_exists(fun_ctx.name().getText())
+        if scope_name is None:
+            scope_name = self.register.get_nearest_scope_name(self.current_scope_name, fun_name)
+
         # copy object from proper place
         if self.mode is ContentdUMLeListenerMode.MAIN:
-            # get current scope and function name
-            scope_name, fun_name = self._get_scope_if_exists(fun_ctx.name().getText())
-            if scope_name is None:
-                scope_name = self.register.get_nearest_scope_name(self.current_scope_name, fun_name)
-
             # get copy of the objects from diagram generator
             arg_list = self._get_arg_copy_from_diagram(arg_names, is_deep_copy)
 
             # call the function
-            returned_objects = self.output_generator.get_function(scope_name, fun_name).call(arg_list, returned_arg_names, self.current_scope_name)
+            returned_objects = self.output_generator.get_function(scope_name, fun_name).call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
             # get copy of the objects from the list of objects created by the function
             arg_list = self._get_arg_copy_from_function(arg_names, is_deep_copy)
 
             # call the function
-            returned_objects = self.output_generator.get_function(self.current_scope_name, self.current_function_name).call(arg_list, returned_arg_names, self.current_scope_name)
+            returned_objects = self.output_generator.get_function(scope_name, fun_name).call(self.output_generator, self.register, arg_list, returned_arg_names, self.current_scope_name)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
 
@@ -295,6 +293,8 @@ class ContentdUMLeListener(dUMLeListener):
         if ctx.list_declaration():  # list declaration (a = [])
             raise Exception(f"List declaration not supported. Line: {ctx.stop.line}")
         elif ctx.fun_call():  # function call (a = fun())
+            if self.mode is ContentdUMLeListenerMode.MAIN and self.is_in_function:  # ignore calling function in other functions
+                return
             returned_objects = self._call_function(ctx.fun_call(), returned_arg_names, ctx.stop.line)
         elif ctx.arg_list_include_scope():  # simple assignment (x, y, z = a, b, c)
             arg_names = [arg_name.name().getText() for arg_name in ctx.arg_list_include_scope().arg_name()]

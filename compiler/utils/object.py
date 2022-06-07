@@ -104,7 +104,6 @@ class Object(ABC):
 
     @staticmethod
     def change_names(objects: List['Object'], names: List[str]) -> List['Object']:
-        #objects = deepcopy(objects_)
         new_names = {object.name: new_name for object, new_name in zip(objects, names)}
 
         for object in objects:
