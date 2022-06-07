@@ -18,7 +18,7 @@ class ValidatingdUMLeListener(dUMLeListener):
     def enter_scope(self, ctx):
         self.current_scope_name = ctx.NAME().getText()
 
-    def enterFun_declaration(self, ctx:dUMLeParser.Fun_declarationContext):
+    def enterFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         if self.is_in_function:
             return
         self.is_in_function = True

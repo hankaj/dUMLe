@@ -1,8 +1,7 @@
 from compiler.utils.register import FunctionDescriptor
-from compiler.utils.object import Object, Connection, Note
+from compiler.utils.object import Object
 from copy import deepcopy, copy
-from typing import List, Tuple
-from compiler.dUMLeParser import dUMLeParser
+from typing import List
 
 
 class FunctionGenerator:

@@ -3,6 +3,7 @@ from typing import List, Tuple
 from plantuml import PlantUML
 from compiler.utils.function_generator import FunctionGenerator
 from compiler.utils.exceptions import ObjectNotDeclaredException
+from compiler.utils.funtion_object import FunctionObject
 from compiler.utils.object import Object
 from compiler.utils.register import Register
 import os
@@ -38,10 +39,10 @@ class OutputGenerator:
         self.server.processes_file(filename="results/output.txt", outfile=output_filename)
         # os.remove("results/output.txt")  # todo: remove
 
-    def add_function(self, scope_name: str, function_name: str, function_generator: FunctionGenerator) -> None:
-        self._functions[scope_name + "&" + function_name] = function_generator
+    def add_function(self, scope_name: str, function_name: str, function: FunctionObject) -> None:
+        self._functions[scope_name + "&" + function_name] = function
 
-    def get_function(self, scope_name: str, function_name: str) -> FunctionGenerator:
+    def get_function(self, scope_name: str, function_name: str) -> FunctionObject:
         return self._functions[scope_name + "&" + function_name]
 
     def _get_scope_if_exists(self, name: str):

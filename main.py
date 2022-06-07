@@ -1,6 +1,8 @@
 import sys
 import traceback
 from antlr4 import CommonTokenStream, ParseTreeWalker, FileStream
+
+from compiler.FunctiondUMLeListener import FunctiondUMLeListener
 from compiler.dUMLeLexer import dUMLeLexer
 from compiler.dUMLeParser import dUMLeParser
 from compiler.ExecutiondUMLeListener import ExecutiondUMLeListener
@@ -44,16 +46,30 @@ def execute_dumle(input_stream):
         output_generator = OutputGenerator()
 
         # code execution
-        content_listener = ContentdUMLeListener(register, output_generator)
-        function_call_listener = FunctionCalldUMLeListener(register, output_generator)
-        execution_listener = ExecutiondUMLeListener(register, output_generator)
+        print("Creating functions...")
+        function_listener = FunctiondUMLeListener(register, output_generator)
+        walker.walk(function_listener, tree)
+
         print("Creating content...")
+        content_listener = ContentdUMLeListener()
+        content_listener.set_global_listener(register, output_generator)
         walker.walk(content_listener, tree)
-        print("Calling functions...")
-        walker.walk(function_call_listener, tree)
-        print("Executing diagrams...")
+
+        print("Executing...")
+        execution_listener = ExecutiondUMLeListener(register, output_generator)
         walker.walk(execution_listener, tree)
 
+        # content_listener = ContentdUMLeListener(register, output_generator)
+        # print("Creating content...")
+        # walker.walk(content_listener, tree)
+        #
+        # print("Calling functions...")
+        # function_call_listener = FunctionCalldUMLeListener(register, output_generator)
+        # walker.walk(function_call_listener, tree)
+        #
+        # print("Executing diagrams...")
+        # execution_listener = ExecutiondUMLeListener(register, output_generator)
+        # walker.walk(execution_listener, tree)
         #print("Debug information:")
         #output_generator.debug()
     except Exception as e:
