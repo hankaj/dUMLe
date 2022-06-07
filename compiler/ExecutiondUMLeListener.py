@@ -1,6 +1,6 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.object import Theme, Actor, UseCase, Connection, Block, Note, Package
+
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 

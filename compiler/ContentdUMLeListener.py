@@ -4,7 +4,6 @@ from typing import Tuple, List
 
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.exceptions import ObjectNotDeclaredException, WrongDiagramTypeException
 from compiler.utils.register import Register
 from compiler.utils.object import Object, Actor, UseCase, Class, Connection, Block, Note, Package
 from compiler.utils.output_generator import OutputGenerator
@@ -19,9 +18,11 @@ class ContentdUMLeListenerMode(Enum):
 
 class ContentdUMLeListener(dUMLeListener):
     def __init__(self, register: Register, output_generator: OutputGenerator):
-        # useful when content listener is called by main.py
+        # needed for both modes
         self.register = register
         self.output_generator = output_generator
+
+        # useful when content listener is called by main.py
         self.current_scope_name = None
         self.is_in_diagram = None
         self.is_in_function = None
@@ -62,9 +63,6 @@ class ContentdUMLeListener(dUMLeListener):
     def _add_object(self, object: Object):
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
-                # if self.current_diagram_name not in self.output_generator.diagram_generators:
-                #     self.output_generator.diagram_generators[self.current_diagram_name].objects = [object]
-                # else:
                 self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
             elif not self.is_in_function:  # global
                 self.output_generator.global_objects[object.name] = object
@@ -75,7 +73,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def set_global_listener(self):
         if self.mode != ContentdUMLeListenerMode.NOT_ACTIVE:
-            raise Exception("Cannot activate content listener. Content listener is already activated")  # todo: change exception type
+            raise Exception("Cannot activate content listener. Content listener is already activated")
 
         # activating content listener to main mode
         self.current_scope_name = self.register.global_scope.name
@@ -88,7 +86,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def set_function_listener(self, parameters: List['Object'], scope_name: str, function_name: str):
         if self.mode != ContentdUMLeListenerMode.NOT_ACTIVE:
-            raise Exception("Cannot activate content listener. Content listener is already activated")  # todo: change exception type
+            raise Exception("Cannot activate content listener. Content listener is already activated")
 
         # activating content listener to function mode
         self.created_objects = parameters

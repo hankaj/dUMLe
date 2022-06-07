@@ -2,14 +2,15 @@ import sys
 import traceback
 from antlr4 import CommonTokenStream, ParseTreeWalker, FileStream
 
-from compiler.FunctiondUMLeListener import FunctiondUMLeListener
 from compiler.dUMLeLexer import dUMLeLexer
 from compiler.dUMLeParser import dUMLeParser
+
+from compiler.FunctiondUMLeListener import FunctiondUMLeListener
 from compiler.ExecutiondUMLeListener import ExecutiondUMLeListener
 from compiler.IndexingdUMLeListener import IndexingdUMLeListener
 from compiler.ContentdUMLeListener import ContentdUMLeListener
 from compiler.ValidatingdUMLeListener import ValidatingdUMLeListener
-from compiler.FunctionCalldUMLeListener import FunctionCalldUMLeListener
+
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 from compiler.utils.error_message import ErrorMessage
@@ -59,22 +60,9 @@ def execute_dumle(input_stream):
         execution_listener = ExecutiondUMLeListener(register, output_generator)
         walker.walk(execution_listener, tree)
 
-        # content_listener = ContentdUMLeListener(register, output_generator)
-        # print("Creating content...")
-        # walker.walk(content_listener, tree)
-        #
-        # print("Calling functions...")
-        # function_call_listener = FunctionCalldUMLeListener(register, output_generator)
-        # walker.walk(function_call_listener, tree)
-        #
-        # print("Executing diagrams...")
-        # execution_listener = ExecutiondUMLeListener(register, output_generator)
-        # walker.walk(execution_listener, tree)
-        #print("Debug information:")
-        #output_generator.debug()
     except Exception as e:
         print("Error message: " + str(e))
-        traceback.print_exc()
+        # traceback.print_exc()  # todo: delete in the final version
 
 
 def main(argv):

@@ -1,13 +1,11 @@
 from enum import Enum, auto
-from typing import List, Tuple
-from plantuml import PlantUML
-from compiler.utils.function_generator import FunctionGenerator
-from compiler.utils.exceptions import ObjectNotDeclaredException
-from compiler.utils.funtion_object import FunctionObject
-from compiler.utils.object import Object
-from compiler.utils.register import Register
-import os
 from copy import deepcopy
+from typing import List
+from plantuml import PlantUML
+
+from compiler.utils.exceptions import ObjectNotDeclaredException
+from compiler.utils.funtion import Function
+from compiler.utils.object import Object
 
 
 class Mode(Enum):
@@ -37,12 +35,12 @@ class OutputGenerator:
         if output_filename is None:
             output_filename = diag_name + "_".join(obj_name for obj_name in object_list)
         self.server.processes_file(filename="results/output.txt", outfile=output_filename)
-        # os.remove("results/output.txt")  # todo: remove
+        # os.remove("results/output.txt")  # todo: remove comment in the final version
 
-    def add_function(self, scope_name: str, function_name: str, function: FunctionObject) -> None:
+    def add_function(self, scope_name: str, function_name: str, function: Function) -> None:
         self._functions[scope_name + "&" + function_name] = function
 
-    def get_function(self, scope_name: str, function_name: str) -> FunctionObject:
+    def get_function(self, scope_name: str, function_name: str) -> Function:
         return self._functions[scope_name + "&" + function_name]
 
     def _get_scope_if_exists(self, name: str):
@@ -54,9 +52,6 @@ class OutputGenerator:
         scope_name, object_name = self._get_scope_if_exists(name)
         if scope_name is None:
             scope_name = current_scope_name
-
-        if scope_name is None:  # todo: delete this in final version
-            raise Exception("Scope name is none. Object generator function: get_object()")
 
         if scope_name == "global":
             try:

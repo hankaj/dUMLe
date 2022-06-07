@@ -1,6 +1,6 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.funtion_object import FunctionObject
+from compiler.utils.funtion import Function
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
 
@@ -42,7 +42,7 @@ class FunctiondUMLeListener(dUMLeListener):
             argument_names = []
             return_names = [name.getText() for name in ctx.arg_list(0).NAME()]
 
-        self.current_function = FunctionObject(function_name, argument_names, return_names)
+        self.current_function = Function(function_name, argument_names, return_names)
         self._enter_scope(ctx)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):

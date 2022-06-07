@@ -1,6 +1,5 @@
 from enum import Enum, auto
 from typing import List
-
 from antlr4 import ParseTreeWalker
 
 from compiler.utils.object import Object
@@ -11,7 +10,7 @@ class RuleType(Enum):
     EXIT = auto()
 
 
-class FunctionObject:
+class Function:
     def __init__(self, name: str, argument_names: List[str], return_names: List[str]):
         self.name = name  # the name of the function
         self.ctx = []  # the list that contains ctx objects that have to be called sequentially
