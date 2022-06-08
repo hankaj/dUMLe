@@ -3,7 +3,17 @@ diagclass diag1:
         public "A()"
     exec
 
-def fun(arg):
+class A:
+    public "A()"
+
+class B:
+    public "B()"
+
+def fun1(ee):
+    block lkk
+    return lkk
+
+def fun(elo):
     class A:
         public "A()"
     class B:
@@ -11,9 +21,7 @@ def fun(arg):
     return A, B
 
 diagclass test:
-    class kjh:
-        public "kk"
-    kjh -> B
+    A, B = fun(global&A)
     exec
 
 diagclass diag2:

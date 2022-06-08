@@ -181,12 +181,6 @@ class ContentdUMLeListener(dUMLeListener):
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
         connection = Connection(ctx)
 
-        # check if the connected objects exists  # todo: fix - this triggers error
-        # if not self.register.is_object_in_scope(connection.source_object_name, self.current_scope_name):
-        #     raise Exception(f"No {connection.source_object_name} object in {self.current_scope_name} scope")
-        # if not self.register.is_object_in_scope(connection.destination_object_name, self.current_scope_name):
-        #     raise Exception(f"No {connection.destination_object_name} object in {self.current_scope_name} scope")
-
         # add the connection information in the proper place
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
@@ -320,7 +314,7 @@ class ContentdUMLeListener(dUMLeListener):
             allowed_types = self.output_generator.diagram_generators[self.current_diagram_name].available_object_types
             for returned_object in returned_objects:
                 if type(returned_object) not in allowed_types:
-                    raise Exception(f"You cannot create {returned_object.__class__.__name__} object in {self.current_diagram_type}")
+                    raise Exception(f"You cannot create {returned_object.__class__.__name__} object in {self.current_diagram_type}. Line {fun_ctx.stop.line}")
 
         # return the result
         return returned_objects
@@ -364,12 +358,6 @@ class ContentdUMLeListener(dUMLeListener):
                     self.output_generator.global_objects[object.name] = object
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
             for object in returned_objects:
-                if object.is_package:
-                    raise Exception(f"You cannot add package to function. Line: {ctx.stop.line}")
-                for existing_object in self.created_objects:
-                    if existing_object.name == object.name:
-                        self.created_objects.remove(existing_object)
-                        break
                 self._add_to_function_objects(object)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")

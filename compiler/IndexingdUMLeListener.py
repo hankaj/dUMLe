@@ -1,6 +1,6 @@
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.funtion import Function
+from compiler.utils.function import Function
 from compiler.utils.output_generator import OutputGenerator
 from compiler.utils.register import Register, Scope, FunctionDescriptor
 from compiler.utils.error_message import ErrorMessage
@@ -105,9 +105,20 @@ class IndexingdUMLeListener(dUMLeListener):
         self.register.add_function_to_scope(fun_name, function_descriptor, self.current_scope_name)
         self.register.scopes[fun_name] = fun_scope
         self._enter_scope(ctx)
+        for name in argument_names:
+            self.register.add_object_to_scope(name, self.current_scope_name)
 
     def exitFun_declaration(self, ctx: dUMLeParser.Fun_declarationContext):
         # decrease nested counter
+        if ctx.arg_list(1):
+            return_names = [name.getText() for name in ctx.arg_list(1).NAME()]
+        else:
+            return_names = [name.getText() for name in ctx.arg_list(0).NAME()]
+        # verify
+        for return_name in return_names:
+            if not self.register.is_object_in_scope(return_name, self.current_scope_name, with_outer=False):
+                self.error.errors.append(f"Cannot return {return_name} object "
+                                         f"because it is not declared in {self.current_scope_name} function")
         self.nested_function_counter -= 1
         if self.nested_function_counter == 0:
             # exit scope
@@ -130,6 +141,15 @@ class IndexingdUMLeListener(dUMLeListener):
             # get information about the called function
             fun_name = ctx.fun_call().name().getText()
             fun_arg_count = len(ctx.fun_call().arg_list_include_scope().arg_name())
+            # check if arguments are valid
+            for arg_name in ctx.fun_call().arg_list_include_scope().arg_name():
+                scope = self.current_scope_name
+                if arg_name.name().SCOPE_NAME():
+                    scope = arg_name.name().SCOPE_NAME().getText()[:-1]
+                name = arg_name.name().NAME().getText()
+                if not self.register.is_object_in_scope(name, scope, with_outer=False):
+                    self.error.errors.append(f"Cannot call function {fun_name} with {name} argument "
+                                             f"because it does not exist in given scope. Line {ctx.start.line}")
             fun_descriptor = self.register.get_function_descriptor_in_scope(fun_name, self.current_scope_name)
 
             # verify the function
@@ -184,12 +204,20 @@ class IndexingdUMLeListener(dUMLeListener):
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
         self._add_enter_ctx_to_fun(ctx)
-        #self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
+        object_name = ctx.NAME().getText()
+        if not self.register.is_object_in_scope(object_name, self.current_scope_name, with_outer=False):
+            self.error.errors.append(f"Cannot add note to {object_name} object "
+                                     f"because it is not present in {self.current_scope_name} scope. Line {ctx.start.line}")
 
     def exitNote(self, ctx: dUMLeParser.NoteContext):
         self._add_exit_ctx_to_fun(ctx)
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
+        source, destination = ctx.name(0).getText(), ctx.name(1).getText()
+        if not self.register.is_object_in_scope(source, self.current_scope_name, with_outer=False):
+            self.error.errors.append(f"No {source} object in {self.current_scope_name} scope. Line {ctx.start.line}")
+        if not self.register.is_object_in_scope(destination, self.current_scope_name, with_outer=False):
+            self.error.errors.append(f"No {destination} object in {self.current_scope_name} scope. Line {ctx.start.line}")
         self._add_enter_ctx_to_fun(ctx)
 
     def exitConnection(self, ctx: dUMLeParser.ConnectionContext):
@@ -221,4 +249,4 @@ class IndexingdUMLeListener(dUMLeListener):
         # then it means that the called function declaration was not found
         for function_name, function_tuples in self.function_descriptors_to_verify.items():
             for function_tuple in function_tuples:
-                self.error.errors.append(f"Did not find declaration of \"{function_name}\". Line: {function_tuple[1]}")
+                self.error.errors.append(f"Did not find declaration of \"{function_name}\" function. Line: {function_tuple[1]}")

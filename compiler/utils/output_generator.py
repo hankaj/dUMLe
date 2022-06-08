@@ -4,7 +4,7 @@ from typing import List
 from plantuml import PlantUML
 
 from compiler.utils.exceptions import ObjectNotDeclaredException
-from compiler.utils.funtion import Function
+from compiler.utils.function import Function
 from compiler.utils.object import Object
 
 
