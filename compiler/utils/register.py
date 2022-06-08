@@ -38,8 +38,6 @@ class Register:
         return True
 
     def add_object_to_scope(self, object_name: str, scope_name: str) -> None:
-        if self.is_object_in_scope(object_name, scope_name, False):
-            raise Exception(f"Object {object_name} is already declared in scope {scope_name}")
         self.scopes[scope_name].object_register.append(object_name)
 
     def add_function_to_scope(self, function_name: str, function_descriptor: FunctionDescriptor, scope_name: str) -> None:

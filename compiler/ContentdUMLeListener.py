@@ -54,7 +54,7 @@ class ContentdUMLeListener(dUMLeListener):
     def _enter_scope(self, ctx):
         self.current_scope_name = ctx.NAME().getText()
         if self.mode is ContentdUMLeListenerMode.MAIN and self.current_scope_name != 'global':
-                self.is_in_global_scope = False
+            self.is_in_global_scope = False
 
     def _exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
@@ -69,13 +69,20 @@ class ContentdUMLeListener(dUMLeListener):
     def _add_object(self, object: Object):
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:  # add the object to proper diagram generator
-                self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
+                self.output_generator.diagram_generators[self.current_diagram_name].add_object(object)
             elif not self.is_in_function:  # add the object in the global scope
                 self.output_generator.global_objects[object.name] = object
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
-            self.created_objects.append(object)  # add the object to the list of objects created by the function
+            self._add_to_function_objects(object)  # add the object to the list of objects created by the function
         else:
             raise Exception("Content listener is not activated. Specify the source of the code")
+
+    def _add_to_function_objects(self, object_to_add: Object):
+        for existing_object in self.created_objects:
+            if object_to_add.name == existing_object.name:
+                self.created_objects.remove(existing_object)
+                break
+        self.created_objects.append(object_to_add)
 
     def set_global_listener(self):
         if self.mode != ContentdUMLeListenerMode.NOT_ACTIVE:
@@ -91,7 +98,7 @@ class ContentdUMLeListener(dUMLeListener):
         self.current_diagram_name = ""
         self.mode = ContentdUMLeListenerMode.MAIN
 
-    def set_function_listener(self, parameters: List['Object'], scope_name: str, function_name: str):
+    def set_function_listener(self, parameters: List[Object], scope_name: str, function_name: str):
         if self.mode != ContentdUMLeListenerMode.NOT_ACTIVE:
             raise Exception("Cannot activate content listener. Content listener is already activated")
 
@@ -187,7 +194,7 @@ class ContentdUMLeListener(dUMLeListener):
                     if object.name == connection.source_object_name:
                         object.add_connection(connection)
                         break
-                if self.current_diagram_type == DiagType.SEQUENCE:  # todo: dont like this idea - problematic for function call
+                if self.current_diagram_type == DiagType.SEQUENCE:
                     self.output_generator.diagram_generators[self.current_diagram_name].sequences.append(connection)
             elif not self.is_in_function:  # global
                 self.output_generator.global_objects[connection.source_object_name].add_connection(connection)
@@ -229,7 +236,7 @@ class ContentdUMLeListener(dUMLeListener):
         #
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
-                self.output_generator.diagram_generators[self.current_diagram_name].objects.append(package)
+                self.output_generator.diagram_generators[self.current_diagram_name].add_object(package)
                 for o in package.objects:
                     objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
                     for existing_object in objects:
@@ -239,7 +246,7 @@ class ContentdUMLeListener(dUMLeListener):
             else:
                 self.output_generator.global_objects[package.name] = package
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
-            self.created_objects.append(package)
+            self._add_to_function_objects(package)
             for o in package.objects:
                 for existing_object in self.created_objects:
                     if existing_object.name == o.name:
@@ -251,9 +258,7 @@ class ContentdUMLeListener(dUMLeListener):
 
     def _get_arg_copy_from_diagram(self, arg_names: List[str], is_deep_copy: List[bool]):
         # get copy of the objects from diagram generator
-        arg_list = self.output_generator.get_objects(arg_names, is_deep_copy, self.current_scope_name)
-
-        return arg_list
+        return self.output_generator.get_objects(arg_names, is_deep_copy, self.current_scope_name)
 
     def _get_arg_copy_from_function(self, arg_names: List[str], is_deep_copy: List[bool]):
         arg_list = []
@@ -315,7 +320,7 @@ class ContentdUMLeListener(dUMLeListener):
             allowed_types = self.output_generator.diagram_generators[self.current_diagram_name].available_object_types
             for returned_object in returned_objects:
                 if type(returned_object) not in allowed_types:
-                    raise Exception(f"You cannot create {type(returned_object)} object in {self.current_diagram_type}")
+                    raise Exception(f"You cannot create {returned_object.__class__.__name__} object in {self.current_diagram_type}")
 
         # return the result
         return returned_objects
@@ -354,18 +359,8 @@ class ContentdUMLeListener(dUMLeListener):
                 if self.is_in_diagram:
                     if object.is_package and object.type != self.current_diagram_type:
                         raise Exception(f"You cannot add package of type {object.type} to {self.current_diagram_type}")
-                    objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
-                    for existing_object in objects:
-                        if existing_object.name == object.name:
-                            objects.remove(existing_object)
-                            break
-                    objects.append(object)
+                    self.output_generator.diagram_generators[self.current_diagram_name].add_object(object)
                 elif not self.is_in_function:  # global
-                    objects = self.output_generator.global_objects
-                    for existing_object in objects:
-                        if existing_object.name == object.name:
-                            objects.remove(existing_object)
-                            break
                     self.output_generator.global_objects[object.name] = object
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
             for object in returned_objects:
@@ -375,7 +370,7 @@ class ContentdUMLeListener(dUMLeListener):
                     if existing_object.name == object.name:
                         self.created_objects.remove(existing_object)
                         break
-                self.created_objects.append(object)
+                self._add_to_function_objects(object)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
 

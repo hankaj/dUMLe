@@ -3,7 +3,18 @@ diagclass diag1:
         public "A()"
     exec
 
+def fun(arg):
+    class A:
+        public "A()"
+    class B:
+        public "B()"
+    return A, B
+
+diagclass test:
+    class kjh:
+        public "kk"
+    kjh -> B
+    exec
+
 diagclass diag2:
     A2 = diag1&A
-    A -> B
-    exec

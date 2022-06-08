@@ -49,7 +49,7 @@ def execute_dumle(input_stream):
         walker.walk(content_listener, tree)
     except Exception as e:
         print("Error message: " + str(e))
-        # traceback.print_exc()  # todo: delete in the final version
+        traceback.print_exc()  # todo: delete in the final version
 
 
 def main(argv):

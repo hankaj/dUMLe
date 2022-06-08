@@ -47,6 +47,13 @@ class DiagGenerator:
                        if sequence.source_object_name in object_list_names
                        and sequence.destination_object_name in object_list_names)
 
+    def add_object(self, object_to_add: Object):
+        for existing_object in self.objects:
+            if existing_object.name == object_to_add.name:
+                self.objects.remove(existing_object)
+                break
+        self.objects.append(object_to_add)
+
     def get_object(self, name: str) -> Object:
         for obj in self.objects:
             if obj.name == name:
