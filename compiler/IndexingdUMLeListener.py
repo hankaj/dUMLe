@@ -184,7 +184,7 @@ class IndexingdUMLeListener(dUMLeListener):
 
     def enterNote(self, ctx: dUMLeParser.NoteContext):
         self._add_enter_ctx_to_fun(ctx)
-        self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
+        #self.register.add_object_to_scope(ctx.NAME().getText(), self.current_scope_name)
 
     def exitNote(self, ctx: dUMLeParser.NoteContext):
         self._add_exit_ctx_to_fun(ctx)

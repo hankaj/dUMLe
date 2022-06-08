@@ -1,4 +1,4 @@
-class ObjectNotDeclaredException(BaseException):
+class ObjectNotDeclaredException(Exception):
     def __init__(self, object_name: str):
         self.object_name = object_name
 
@@ -6,7 +6,7 @@ class ObjectNotDeclaredException(BaseException):
         return f"Object {self.object_name} not found"
 
 
-class WrongDiagramTypeException(BaseException):
+class WrongDiagramTypeException(Exception):
     def __init__(self,  diag_type, obj_type):
         self.diag_type = diag_type
         self.obj_type = obj_type
@@ -15,7 +15,7 @@ class WrongDiagramTypeException(BaseException):
         return f"Cannot add {self.obj_type} to {self.diag_type}"
 
 
-class RecursionDepthException(BaseException):
+class RecursionDepthException(Exception):
     def __init__(self, max_depth: int):
         self.max_depth = max_depth
 

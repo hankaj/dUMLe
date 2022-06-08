@@ -2,9 +2,9 @@ usecase global:
     "taki sobie globalny UC, co się interesujesz?"
 
 def fun(arg):
-    usecase fun:
+    usecase f:
         "fun czyli dobra zabawa"
-    arg -> fun
+    arg -> f
     return arg
 
 diagusecase uc:
@@ -14,5 +14,6 @@ diagusecase uc:
     globalo = global&global
     stary -> globalo
     actor mlody
-    mlody = fun(mlody)
+    mlody2 = fun(mlody)
+
     exec

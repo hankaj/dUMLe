@@ -5,13 +5,13 @@ def fun2():
 
 A = fun2()
 
-def fun(arg):
-    arg = fun(arg)
-    arg -> global&A
-    return arg
+def fun(arg1, arg2):
+    arg1 -> arg2
+    return arg1, arg2
 
 diagclass PUDZIAN_KING:
     class test:
         private "test()"
-    X = fun(test)
-    exec X
+
+    X, Y = fun(test, global&A)
+    exec

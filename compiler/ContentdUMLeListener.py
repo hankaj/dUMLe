@@ -4,7 +4,7 @@ from typing import Tuple, List
 
 from compiler.dUMLeListener import dUMLeListener
 from compiler.dUMLeParser import dUMLeParser
-from compiler.utils.exceptions import RecursionDepthException
+from compiler.utils.exceptions import RecursionDepthException, ObjectNotDeclaredException, WrongDiagramTypeException
 from compiler.utils.register import Register
 from compiler.utils.object import Object, Actor, UseCase, Class, Connection, Block, Note, Package
 from compiler.utils.output_generator import OutputGenerator
@@ -198,32 +198,53 @@ class ContentdUMLeListener(dUMLeListener):
                     break
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        return
-        # todo: adjust package
         # TODO: support object access and list access
-        # if self.is_in_function:
-        #     raise Exception(f"Cannot declare package inside of the function")
-        # object_names = [name.getText() for name in ctx.NAME()]
-        # object_names.pop(0)
-        # is_deep_copy = [True for _ in enumerate(object_names)]
-        # try:
-        #     objects = self.output_generator.get_objects(object_names, is_deep_copy, self.current_scope_name)
-        # except ObjectNotDeclaredException as e:
-        #     raise Exception(f"{e} Line: {ctx.stop.line}")
-        # try:
-        #     package = Package(ctx, objects)
-        # except WrongDiagramTypeException as e:
-        #     raise Exception(f"{e} Line {ctx.stop.line}")
-        # if self.is_in_diagram:
-        #     self.output_generator.diagram_generators[self.current_diagram_name].objects.append(package)
-        #     for o in package.objects:
-        #         objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
-        #         for existing_object in objects:
-        #             if existing_object.name == o.name:
-        #                 objects.remove(existing_object)
-        #                 break
-        # else:
-        #     self.output_generator.global_objects[package.name] = package
+        #
+        if self.is_in_function:
+            raise Exception(f"Cannot declare package inside of the function")
+        object_names = [name.getText() for name in ctx.NAME()]
+        object_names.pop(0)
+        is_deep_copy = [True for _ in enumerate(object_names)]
+
+        #
+        try:
+            # copy argument objects from proper place
+            if self.mode is ContentdUMLeListenerMode.MAIN:
+                # get copy of the objects from diagram generator
+                objects = self._get_arg_copy_from_diagram(object_names, is_deep_copy)
+            elif self.mode is ContentdUMLeListenerMode.FUNCTION:
+                # get copy of the objects from the list of objects created by the function
+                objects = self._get_arg_copy_from_function(object_names, is_deep_copy)
+            else:  # wrong mode
+                raise Exception("Wrong mode. Cannot call the function")
+        except ObjectNotDeclaredException as e:
+            raise Exception(f"{e} Line: {ctx.stop.line}")
+
+        #
+        try:
+            package = Package(ctx, objects)
+        except WrongDiagramTypeException as e:
+            raise Exception(f"{e} Line {ctx.stop.line}")
+
+        #
+        if self.mode is ContentdUMLeListenerMode.MAIN:
+            if self.is_in_diagram:
+                self.output_generator.diagram_generators[self.current_diagram_name].objects.append(package)
+                for o in package.objects:
+                    objects = self.output_generator.diagram_generators[self.current_diagram_name].objects
+                    for existing_object in objects:
+                        if existing_object.name == o.name:
+                            objects.remove(existing_object)
+                            break
+            else:
+                self.output_generator.global_objects[package.name] = package
+        elif self.mode is ContentdUMLeListenerMode.FUNCTION:
+            self.created_objects.append(package)
+            for o in package.objects:
+                for existing_object in self.created_objects:
+                    if existing_object.name == o.name:
+                        self.created_objects.remove(existing_object)
+                        break
 
     def enterTheme(self, ctx: dUMLeParser.ThemeContext):
         raise Exception(f"Theme is not yet supported. Line: {ctx.stop.line}")
@@ -276,6 +297,8 @@ class ContentdUMLeListener(dUMLeListener):
             arg_list = self._get_arg_copy_from_function(arg_names, is_deep_copy)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
+
+        # todo: block packages ?
 
         # call the function and set up maximum recursion depth
         function = self.output_generator.get_function(scope_name, fun_name)

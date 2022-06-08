@@ -2,19 +2,23 @@ def fun(arg):
     class G:
         private "asedasd()"
     arg -> G
-    return arg
+    return arg, G
 
 class A:
     private "void print()"
 
 diagclass CLASS1:
-    exec
     class C:
         protected "C()"
 
     class D:
         protected "D()"
 
+    note D:
+        "adsaD"
+
     C -> D
     D -> C
-    X = fun(C)
+    X, Y = fun(C)
+
+    exec
