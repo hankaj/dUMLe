@@ -9,7 +9,6 @@ from compiler.FunctiondUMLeListener import FunctiondUMLeListener
 from compiler.ExecutiondUMLeListener import ExecutiondUMLeListener
 from compiler.IndexingdUMLeListener import IndexingdUMLeListener
 from compiler.ContentdUMLeListener import ContentdUMLeListener
-from compiler.ValidatingdUMLeListener import ValidatingdUMLeListener
 
 from compiler.utils.register import Register
 from compiler.utils.output_generator import OutputGenerator
@@ -36,11 +35,8 @@ def execute_dumle(input_stream):
 
         # todo: merge indexing and validating
         indexing_listener = IndexingdUMLeListener(register, error)
-        validating_listener = ValidatingdUMLeListener(register, error)
         print("Indexing...")
         walker.walk(indexing_listener, tree)
-        print("Validating...")
-        walker.walk(validating_listener, tree)
         if error.errors:
             print("Fix the following errors:")
             print(error.errors)
