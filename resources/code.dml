@@ -1,61 +1,69 @@
-def fun(arg):
-    class G:
-        private "asedasd()"
-    arg -> G
+def fun1():
+    class A1:
+        public "A1()"
 
-    return arg, G
+    class B1:
+        public "B1()"
 
-class A:
-    private "void print()"
+    class C1:
+        public "C1()"
 
-diagclass test:
-    exec
-    class C:
-        protected "C()"
+    B1 inherit C1
+    C1 aggregate B1
 
-    class A:
-        private "AsdasD()"
+    return B1, C1
 
-    MALIK_MONTANA, GLOBAL_CLASS = fun(global&A)
+def fun2(A2, B2):
+    B2 associate A2
+    return A2, B2
 
-    class D:
-        protected "D()"
+def fun3():
+    A3, B3 = fun1()
+    C3, D3 = fun2($A3, $B3)
+    class E3:
+        protected "E3()"
 
-    C inherit D
-    D aggregate C
+    C3 inherit E3
 
-    class G:
-        public "asdG()"
+    return C3, D3, E3
 
-    class H:
-        public "asdH()"
+def error1():
+    class W:
+        private "W()"
+    return W
 
-    H5 = fun11(A)
-
-    G1, H1 = fun10($C, $D)
-    G2, H2 = fun10(C, D)
-    G3, H3 = fun10(C, D)
-
-def fun10(arg1, arg2):
-    arg1 depend arg2
+def recursion(arg1, arg2):
+    arg1 inherit arg2
+    arg1, arg2 = recursion($arg1, $arg2)
     return arg1, arg2
 
-def fun11(arg1):
-    return arg1
+diagclass main:
+    class W:
+        public "W()"
 
-def fun1():
-    class M1B:
-        private "void print12454231236346()"
-    class M2:
-        public "void helloWorld()"
+    class V:
+        public "V()"
 
-    M1B compose M2
-    return M1B, M2
+    exec [V] "main_ver1.png"
 
-def fun2():
-    class M3:
-        private "void print()"
-    class M4:
-        public "void helloWorld()"
+    G, H = recursion(W, V) 3
 
-    return M4, M3
+    XX = fun4()
+
+    G2, H2 = recursion(W, V) 3
+
+    exec "main_ver2.png"
+
+    class J:
+        private "J()"
+
+    G aggregate J
+
+    P = error1()
+
+    exec "main_ver_final.png"
+
+def fun4():
+    class A:
+        public "A()"
+    return A

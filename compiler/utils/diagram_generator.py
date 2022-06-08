@@ -1,7 +1,8 @@
 from compiler.utils.output_generator import Mode
 from typing import List, Optional
-from compiler.utils.object import Object, Class, UseCase, Actor, Block
 from enum import Enum, auto
+
+from compiler.utils.object import Object, Class, UseCase, Actor, Block
 from compiler.utils.exceptions import ObjectNotDeclaredException
 
 

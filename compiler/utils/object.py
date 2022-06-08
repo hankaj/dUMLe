@@ -69,7 +69,8 @@ class Object(ABC):
 
     def generate(self) -> str:
         result = self._generate()
-        # implement theme here
+
+        # todo: implement theme here
 
         if self.note:
             result += self.note.generate()
@@ -104,13 +105,11 @@ class Object(ABC):
 
     @staticmethod
     def change_names(objects: List['Object'], names: List[str]) -> List['Object']:
-        #objects = deepcopy(objects_)
         new_names = {object.name: new_name for object, new_name in zip(objects, names)}
 
         for object in objects:
             new_connections = {}
             for destination_object_name, connections in object.connections.items():
-                #connections = deepcopy(connections)
                 for connection in connections:
                     if connection.source_object_name in new_names:
                         connection.source_object_name = new_names[connection.source_object_name]
@@ -124,6 +123,7 @@ class Object(ABC):
             if object.note:
                 object.note.object_name = object.name
             object.connections = new_connections
+
         return objects
 
 
@@ -243,4 +243,3 @@ class Package(Object):
         connections = "".join(obj.generate_connections(names) for obj in self.objects)
         package_type = "namespace" if self.type == DiagType.CLASS else "package"
         return f"{package_type} {self.name}" + "{\n" + generated_objects + connections + "}\n"
-

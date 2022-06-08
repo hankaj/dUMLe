@@ -42,18 +42,9 @@ class Register:
             raise Exception(f"Object {object_name} is already declared in scope {scope_name}")
         self.scopes[scope_name].object_register.append(object_name)
 
-    # def remove_object_from_scope
-
     def add_function_to_scope(self, function_name: str, function_descriptor: FunctionDescriptor, scope_name: str) -> None:
         if self.is_function_in_scope(function_name, scope_name):
             raise Exception("Function \"" + function_name + "\" is already declared in scope \"" + scope_name + "\"")
-
-        if scope_name is None:
-            print("\n\nScope name is none\n")
-
-        if function_name is None:
-            print("\n\nFunction name is none\n")
-
         self.scopes[scope_name].function_register[function_name] = function_descriptor
 
     def update_function_in_scope(self, function_name: str, function_descriptor: FunctionDescriptor, scope_name: str):
@@ -81,4 +72,3 @@ class Register:
         if fun_name not in self.scopes[current_scope_name].function_register:
             return self.get_nearest_scope_name(self.parent_name(current_scope_name), fun_name)
         return current_scope_name
-

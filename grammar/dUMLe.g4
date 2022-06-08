@@ -43,7 +43,7 @@ list_declaration
     : '[' BR* ((name | obj_access) BR* (',' BR* (name | obj_access))*)? BR* ']';
     
 list_access
-    : name '[' DIGIT+ ']' BR*;
+    : name '[' NUMBER ']' BR*;
     
 assignment
     : arg_list BR+ '=' BR+ (fun_call | list_declaration | arg_list_include_scope) BR* NL;
@@ -54,7 +54,7 @@ fun_declaration
         IND+ 'return' BR+ arg_list BR* NL;
         
 fun_call
-    : name '(' BR* arg_list_include_scope BR* ')' BR*;
+    : name '(' BR* arg_list_include_scope BR* ')' BR* NUMBER? BR*;
 
 execution
     : 'exec' (BR+ NAME)? (BR+ MODE)? (BR+ (list_declaration | list_access | NAME))? (BR+ TEXT)? BR* NL;
@@ -157,10 +157,6 @@ COM_SIGN
 DEEP_COPY
     :
     '$';
-	
-DIGIT
-    :
-    [0-9];
 
 BR
     :
@@ -173,6 +169,10 @@ SCOPE_NAME
 NAME
     :
     [A-Za-z_][a-zA-Z0-9_]*;
+
+NUMBER
+    :
+    [0-9]+;
     
 NL
     :

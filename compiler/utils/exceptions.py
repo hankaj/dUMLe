@@ -13,3 +13,11 @@ class WrongDiagramTypeException(BaseException):
 
     def __str__(self):
         return f"Cannot add {self.obj_type} to {self.diag_type}"
+
+
+class RecursionDepthException(BaseException):
+    def __init__(self, max_depth: int):
+        self.max_depth = max_depth
+
+    def __str__(self):
+        return f"Maximum depth ({self.max_depth}) of the recursion was reached"
