@@ -201,18 +201,17 @@ class ContentdUMLeListener(dUMLeListener):
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
         # TODO: support object access and list access
         #
-        if self.is_in_function:
-            raise Exception(f"Cannot declare package inside of the function")
         object_names = [name.getText() for name in ctx.NAME()]
         object_names.pop(0)
         is_deep_copy = [True for _ in enumerate(object_names)]
-
+        objects = []
         #
         try:
             # copy argument objects from proper place
             if self.mode is ContentdUMLeListenerMode.MAIN:
                 # get copy of the objects from diagram generator
-                objects = self._get_arg_copy_from_diagram(object_names, is_deep_copy)
+                if not self.is_in_function:
+                    objects = self._get_arg_copy_from_diagram(object_names, is_deep_copy)
             elif self.mode is ContentdUMLeListenerMode.FUNCTION:
                 # get copy of the objects from the list of objects created by the function
                 objects = self._get_arg_copy_from_function(object_names, is_deep_copy)
@@ -237,7 +236,7 @@ class ContentdUMLeListener(dUMLeListener):
                         if existing_object.name == o.name:
                             objects.remove(existing_object)
                             break
-            else:
+            elif not self.is_in_function: #global
                 self.output_generator.global_objects[package.name] = package
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
             self._add_to_function_objects(package)

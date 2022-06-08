@@ -101,7 +101,8 @@ class IndexingdUMLeListener(dUMLeListener):
 
         # create scope for the newly created function
         fun_scope = Scope(fun_name, self.current_scope_name, [], {})
-
+        if self.register.is_function_in_scope(fun_name, self.current_scope_name):
+            raise Exception(f"Function {fun_name} is already declared in scope {self.current_scope_name}. Line {ctx.start.line}")
         self.register.add_function_to_scope(fun_name, function_descriptor, self.current_scope_name)
         self.register.scopes[fun_name] = fun_scope
         self._enter_scope(ctx)

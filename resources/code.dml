@@ -1,28 +1,23 @@
-diagclass diag1:
-    class A:
-        public "A()"
-    exec
-
-class A:
-    public "A()"
-
-class B:
-    public "B()"
-
-def fun1(ee):
-    block lkk
-    return lkk
-
-def fun(elo):
+def fun():
     class A:
         public "A()"
     class B:
         public "B()"
-    return A, B
+    A -> B
+    package CLASS a:
+        A
+        B
+    return a
+
+def fun1():
+    block A
+    package SEQ kk:
+        A
+    return kk
+
 
 diagclass test:
-    A, B = fun(global&A)
+    x = fun()
+    class A:
+        "ups"
     exec
-
-diagclass diag2:
-    A2 = diag1&A

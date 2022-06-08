@@ -2,7 +2,7 @@ from compiler.utils.output_generator import Mode
 from typing import List, Optional
 from enum import Enum, auto
 
-from compiler.utils.object import Object, Class, UseCase, Actor, Block
+from compiler.utils.object import Object, Class, UseCase, Actor, Block, Package
 from compiler.utils.exceptions import ObjectNotDeclaredException
 
 
@@ -12,7 +12,9 @@ class DiagType(Enum):
     SEQUENCE = auto()
 
 
-OBJECTS_IN_DIAGRAMS = {DiagType.CLASS: [Class], DiagType.USE_CASE: [UseCase, Actor], DiagType.SEQUENCE: [Block]}
+OBJECTS_IN_DIAGRAMS = {DiagType.CLASS: [Class, Package],
+                       DiagType.USE_CASE: [UseCase, Actor, Package],
+                       DiagType.SEQUENCE: [Block, Package]}
 
 
 class DiagGenerator:
