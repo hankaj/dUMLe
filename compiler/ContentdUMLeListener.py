@@ -20,18 +20,19 @@ class ContentdUMLeListenerMode(Enum):
 class ContentdUMLeListener(dUMLeListener):
     def __init__(self, register: Register, output_generator: OutputGenerator):
         # needed for both modes
-        self.register = register
         self.output_generator = output_generator
-
-        # useful when content listener is called by main.py
+        self.register = register
         self.current_scope_name = None
+        self.current_function_name = None
+
+        # useful when content listener is called in MAIN mode
         self.is_in_diagram = None
         self.is_in_function = None
+        self.is_in_global_scope = None
         self.current_diagram_type = None
-        self.current_function_name = None
         self.current_diagram_name = None
 
-        # useful when content listener is called by user declared function
+        # useful when content listener is called in FUNCTION mode
         self.created_objects = None
 
         # flag for the mode
@@ -52,9 +53,13 @@ class ContentdUMLeListener(dUMLeListener):
 
     def _enter_scope(self, ctx):
         self.current_scope_name = ctx.NAME().getText()
+        if self.mode is ContentdUMLeListenerMode.MAIN and self.current_scope_name != 'global':
+                self.is_in_global_scope = False
 
     def _exit_scope(self):
         self.current_scope_name = self.register.parent_name(self.current_scope_name)
+        if self.mode is ContentdUMLeListenerMode.MAIN and self.current_scope_name == 'global':
+            self.is_in_global_scope = True
 
     def _get_scope_if_exists(self, name: str) -> Tuple[str | None, str]:
         if "&" in name:
@@ -63,12 +68,12 @@ class ContentdUMLeListener(dUMLeListener):
 
     def _add_object(self, object: Object):
         if self.mode is ContentdUMLeListenerMode.MAIN:
-            if self.is_in_diagram:
+            if self.is_in_diagram:  # add the object to proper diagram generator
                 self.output_generator.diagram_generators[self.current_diagram_name].objects.append(object)
-            elif not self.is_in_function:  # global
+            elif not self.is_in_function:  # add the object in the global scope
                 self.output_generator.global_objects[object.name] = object
         elif self.mode is ContentdUMLeListenerMode.FUNCTION:
-            self.created_objects.append(object)
+            self.created_objects.append(object)  # add the object to the list of objects created by the function
         else:
             raise Exception("Content listener is not activated. Specify the source of the code")
 
@@ -79,6 +84,7 @@ class ContentdUMLeListener(dUMLeListener):
         # activating content listener to main mode
         self.current_scope_name = self.register.global_scope.name
         self.is_in_diagram = False
+        self.is_in_global_scope = True
         self.is_in_function = False
         self.current_diagram_type = None
         self.current_function_name = ""
@@ -150,6 +156,7 @@ class ContentdUMLeListener(dUMLeListener):
     def enterNote(self, ctx: dUMLeParser.NoteContext):
         note = Note(ctx)
 
+        # adding note to the proper place
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
                 for object in self.output_generator.diagram_generators[self.current_diagram_name].objects:
@@ -166,12 +173,14 @@ class ContentdUMLeListener(dUMLeListener):
 
     def enterConnection(self, ctx: dUMLeParser.ConnectionContext):
         connection = Connection(ctx)
-        # todo: below should be checked in validating/indexing listener
+
+        # check if the connected objects exists  # todo: fix - this triggers error
         # if not self.register.is_object_in_scope(connection.source_object_name, self.current_scope_name):
         #     raise Exception(f"No {connection.source_object_name} object in {self.current_scope_name} scope")
         # if not self.register.is_object_in_scope(connection.destination_object_name, self.current_scope_name):
         #     raise Exception(f"No {connection.destination_object_name} object in {self.current_scope_name} scope")
 
+        # add the connection information in the proper place
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
                 for object in self.output_generator.diagram_generators[self.current_diagram_name].objects:
@@ -235,9 +244,9 @@ class ContentdUMLeListener(dUMLeListener):
                     found_object = function_object
                     break
 
-            # check if the object was found  # todo: move to validating/indexing in the final version
+            # check if the object was found
             if found_object is None:
-                raise Exception("Object was not declared in this scope")
+                raise Exception(f"Object {object_name} was not declared in this scope")
 
             # copy found object and add it to arg_list
             copied_object = deepcopy(found_object)
@@ -346,3 +355,41 @@ class ContentdUMLeListener(dUMLeListener):
                 self.created_objects.append(object)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
+
+    def enterExecution(self, ctx: dUMLeParser.ExecutionContext):
+        if self.is_in_function:
+            raise Exception(f"Cannot execute diagram inside the function. Line: {ctx.stop.line}")
+
+        if not self.is_in_diagram and not self.is_in_global_scope:
+            raise Exception(f"Exec can only be called in global scope or in diagram. Line: {ctx.stop.line}")
+
+        if not self.is_in_diagram and not ctx.NAME(0):
+            raise Exception(f"Diagram name is required in global execution. "
+                            f"Please provide the name of the diagram that you want to execute. "
+                            f" Line: {ctx.stop.line}")
+
+        diag_name = self.current_diagram_name
+        file_name = self.current_diagram_name + ".png"
+        mode = None
+        object_list = None
+
+        if ctx.NAME(0):
+            diag_name = ctx.NAME(0).getText()
+
+        if ctx.TEXT():
+            file_name = ctx.TEXT().getText()[1:-1]
+            if file_name[-4:] != ".png":
+                raise Exception(f"The only supported extension is png. Please provide the png file. "
+                                f"Line: {ctx.stop.line}")
+
+        if ctx.MODE():
+            mode = ctx.MODE().getText()
+
+        if ctx.list_declaration():
+            object_list = [name.getText() for name in ctx.list_declaration().name()]
+        elif ctx.list_access():
+            raise Exception(f"List access is not supported. Line: {ctx.stop.line}")
+        elif ctx.NAME(1):
+            raise Exception(f"List name is not supported. Line: {ctx.stop.line}")
+
+        self.output_generator.generate(diag_name, mode, object_list, file_name)

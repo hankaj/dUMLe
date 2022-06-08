@@ -5,8 +5,6 @@ from antlr4 import CommonTokenStream, ParseTreeWalker, FileStream
 from compiler.dUMLeLexer import dUMLeLexer
 from compiler.dUMLeParser import dUMLeParser
 
-from compiler.FunctiondUMLeListener import FunctiondUMLeListener
-from compiler.ExecutiondUMLeListener import ExecutiondUMLeListener
 from compiler.IndexingdUMLeListener import IndexingdUMLeListener
 from compiler.ContentdUMLeListener import ContentdUMLeListener
 
@@ -18,7 +16,6 @@ from compiler.utils.error_message import ErrorMessage
 def execute_dumle(input_stream):
     # creating objects
     try:
-        error = ErrorMessage([])
         lexer = dUMLeLexer(input_stream)
         stream = CommonTokenStream(lexer)
         parser = dUMLeParser(stream)
@@ -28,38 +25,28 @@ def execute_dumle(input_stream):
         if parser.getNumberOfSyntaxErrors() > 0:
             exit(-1000)
 
+        # creating objects needed for code execution
         walker = ParseTreeWalker()
+        error = ErrorMessage([])
         register = Register()
+        output_generator = OutputGenerator()
 
-        # validating the code
-
-        # todo: merge indexing and validating
-        indexing_listener = IndexingdUMLeListener(register, error)
+        # indexing the code
         print("Indexing...")
+        indexing_listener = IndexingdUMLeListener(register, output_generator, error)
         walker.walk(indexing_listener, tree)
+
+        # handling the errors
         if error.errors:
             print("Fix the following errors:")
             print(error.errors)
             return
 
-        output_generator = OutputGenerator()
-
-        # code execution
-        print("Creating functions...")
-        function_listener = FunctiondUMLeListener(register, output_generator)
-        walker.walk(function_listener, tree)
-
-        # todo: merge executing and creating content
-
-        print("Creating content...")
+        # executing the code
+        print("Executing code...")
         content_listener = ContentdUMLeListener(register, output_generator)
         content_listener.set_global_listener()
         walker.walk(content_listener, tree)
-
-        print("Executing...")
-        execution_listener = ExecutiondUMLeListener(register, output_generator)
-        walker.walk(execution_listener, tree)
-
     except Exception as e:
         print("Error message: " + str(e))
         # traceback.print_exc()  # todo: delete in the final version

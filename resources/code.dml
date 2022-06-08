@@ -27,6 +27,11 @@ def fun3():
 
     return C3, D3, E3
 
+def error1():
+    class W:
+        private "W()"
+    return W
+
 def recursion(arg1, arg2):
     arg1 inherit arg2
     arg1, arg2 = recursion($arg1, $arg2)
@@ -39,6 +44,26 @@ diagclass main:
     class V:
         public "V()"
 
+    exec [V] "main_ver1.png"
+
     G, H = recursion(W, V) 3
 
-    exec [G, H]
+    XX = fun4()
+
+    G2, H2 = recursion(W, V) 3
+
+    exec "main_ver2.png"
+
+    class J:
+        private "J()"
+
+    G aggregate J
+
+    P = error1()
+
+    exec "main_ver_final.png"
+
+def fun4():
+    class A:
+        public "A()"
+    return A
