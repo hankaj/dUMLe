@@ -31,6 +31,8 @@ class OutputGenerator:
         output = "@startuml\n"
         output += diagram_generator.generate(mode, object_list)
         output += "@enduml"
+        if not os.path.exists("results/"):
+            os.makedirs("results")
         with open("results/output.txt", 'w+') as fp:
             fp.write(output)
         if output_filename is None:
