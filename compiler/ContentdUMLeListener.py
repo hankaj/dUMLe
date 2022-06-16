@@ -199,13 +199,10 @@ class ContentdUMLeListener(dUMLeListener):
                     break
 
     def enterPackage_declaration(self, ctx: dUMLeParser.Package_declarationContext):
-        # TODO: support object access and list access
-        #
         object_names = [name.getText() for name in ctx.NAME()]
         object_names.pop(0)
         is_deep_copy = [True for _ in enumerate(object_names)]
         objects = []
-        #
         try:
             # copy argument objects from proper place
             if self.mode is ContentdUMLeListenerMode.MAIN:
@@ -220,13 +217,11 @@ class ContentdUMLeListener(dUMLeListener):
         except ObjectNotDeclaredException as e:
             raise Exception(f"{e} Line: {ctx.stop.line}")
 
-        #
         try:
             package = Package(ctx, objects)
         except WrongDiagramTypeException as e:
             raise Exception(f"{e} Line {ctx.stop.line}")
 
-        #
         if self.mode is ContentdUMLeListenerMode.MAIN:
             if self.is_in_diagram:
                 self.output_generator.diagram_generators[self.current_diagram_name].add_object(package)
@@ -295,8 +290,6 @@ class ContentdUMLeListener(dUMLeListener):
             arg_list = self._get_arg_copy_from_function(arg_names, is_deep_copy)
         else:  # wrong mode
             raise Exception("Wrong mode. Cannot call the function")
-
-        # todo: block packages ?
 
         # call the function and set up maximum recursion depth
         function = self.output_generator.get_function(scope_name, fun_name)

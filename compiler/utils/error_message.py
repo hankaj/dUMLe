@@ -14,4 +14,4 @@ class ErrorMessage:
     errors: List[str]
 
     def print(self):
-        pass  # todo: write printing
+        pass

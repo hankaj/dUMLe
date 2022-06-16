@@ -25,8 +25,6 @@ class DiagGenerator:
         self.sequences = []
 
     def generate(self, mode: Mode, object_list_names: Optional[List[str]] = None) -> str:
-        # todo: support mode
-
         if object_list_names is None:
             return self._generate_all()
         else:
@@ -60,8 +58,4 @@ class DiagGenerator:
         for obj in self.objects:
             if obj.name == name:
                 return obj
-            # if obj.is_package:
-            #     for package_obj in obj.objects:
-            #         if package_obj.name == name:
-            #             return package_obj
         raise ObjectNotDeclaredException(name)

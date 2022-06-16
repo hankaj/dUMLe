@@ -1,7 +1,0 @@
-diagseq seq:
-    block hej
-    block klej
-    hej -> klej
-    hej -> klej labeled "mess
-    klej -> hej labeled "return"
-    exec

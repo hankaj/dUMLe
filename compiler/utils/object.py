@@ -39,7 +39,6 @@ class Connection:
         result += "\n"
         return result
 
-# todo: change the Note class to look similar to Connection class
 class Note:
     def __init__(self, ctx: dUMLeParser.NoteContext):
         self.object_name = ctx.NAME().getText()
@@ -57,7 +56,7 @@ class Object(ABC):
         self.is_package = False
         self.name = ""
         self.note = None
-        self.theme = None  # todo: implement theme
+        self.theme = None
         self.connections = {}
 
     def __str__(self):
@@ -69,8 +68,6 @@ class Object(ABC):
 
     def generate(self) -> str:
         result = self._generate()
-
-        # todo: implement theme here
 
         if self.note:
             result += self.note.generate()
@@ -205,7 +202,6 @@ class Actor(Object):
         super().__init__()
 
         if ctx.name():
-            # todo: theme is used in object
             self.theme_name = ctx.name().getText()
         self.name = ctx.NAME().getText()
 

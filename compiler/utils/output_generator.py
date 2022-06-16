@@ -36,7 +36,7 @@ class OutputGenerator:
             output_filename = diag_name + "_".join(obj_name for obj_name in object_list)
         output_filename = "results/" + output_filename
         self.server.processes_file(filename="results/output.txt", outfile=output_filename)
-        # os.remove("results/output.txt")  # todo: remove comment in the final version
+        os.remove("results/output.txt")
 
     def add_function(self, scope_name: str, function_name: str, function: Function) -> None:
         self._functions[scope_name + "&" + function_name] = function
