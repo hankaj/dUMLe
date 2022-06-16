@@ -10,7 +10,7 @@ Our language allows creating UML diagrams:
 
 ## Usage
 
-Make sure you have internet connection. Clone this repository.
+Make sure you have internet connection and Python 3.10 installed. Clone this repository.
 
 ```
 git clone https://gitlab.kis.agh.edu.pl/dpalka/komp22-dumle.git
