@@ -10,10 +10,11 @@ Our language allows creating UML diagrams:
 
 ## Usage
 
-Clone this repository.
+Make sure you have internet connection. Clone this repository.
 
 ```
 git clone https://gitlab.kis.agh.edu.pl/dpalka/komp22-dumle.git
+cd komp22-dumle
 ```
 
 To get your diagram in .png format run following commands:

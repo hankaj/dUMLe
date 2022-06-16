@@ -2,6 +2,7 @@ from enum import Enum, auto
 from copy import deepcopy
 from typing import List
 from plantuml import PlantUML
+import os
 
 from compiler.utils.exceptions import ObjectNotDeclaredException
 from compiler.utils.function import Function
